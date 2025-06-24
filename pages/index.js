@@ -199,9 +199,9 @@ export default function Home() {
       contributeSuggested: "Suggested Amounts: 0.01 ETH, 0.05 ETH, 0.1 ETH (or any amount you wish)",
       testimonialsTitle: "What our users say",
       testimonials: [
-        { quote: "MultitokenWorld is a fantastic tool. It helped me understand contracts that previously seemed impossible. Highly recommended!", name: "Ana P., Crypto Enthusiast", stars: 5 },
-        { quote: "I was able to create my own ERC-20 token in minutes without writing a single line of code. The education is invaluable.", name: "Carlos G., Novice Developer", stars: 5 },
-        { quote: "Live prices are very useful, and the glossary is my favorite resource. It's a very complete platform.", name: "Sofia M., Investor", stars: 4 },
+        { quote: "MultitokenWorld is a fantastic tool. It helped me understand contracts that antes me parecían imposibles. ¡Totalmente recomendable!", name: "Ana P., Crypto Enthusiast", stars: 5 },
+        { quote: "Pude crear mi propio token ERC-20 en minutos sin escribir una línea de código. La educación es invaluable.", name: "Carlos G., Desarrollador Novato", stars: 5 },
+        { quote: "Los precios en vivo son muy útiles, y el glosario es mi recurso favorito. Es una plataforma muy completa.", name: "Sofía M., Inversora", stars: 4 },
       ],
       roadmap: "Roadmap 2025",
       steps: [
