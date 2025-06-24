@@ -91,7 +91,7 @@
 <body class="min-h-screen pt-20"> <nav class="fixed w-full z-50 bg-gray-900 bg-opacity-95 shadow-lg py-4">
         <div class="container mx-auto flex justify-between items-center px-6">
             <a href="#" class="flex items-center space-x-3">
-                <img src="multitokenworld-logo.png" alt="MultitokenWorld Logo" class="w-12 h-12 rounded-full">
+                <img src="multitokenworld-logo.png" alt="MultitokenWorld Logo" class="w-10 h-10 rounded-full">
                 <span class="text-2xl font-extrabold text-white hidden md:block">MultitokenWorld</span>
             </a>
             <div class="flex items-center space-x-6">
@@ -633,8 +633,10 @@
             testimonialsGrid.innerHTML = '';
             t.testimonials.forEach(testimonial => {
                 let starsHtml = '';
+                // Ajuste aquí: el tamaño de la estrella es por `font-size` en el CSS, no por `width/height` de imagen.
+                // Ya tiene `text-xl` aplicado a `.star-icon` en el CSS global que es pequeño.
                 for (let i = 0; i < testimonial.stars; i++) {
-                    starsHtml += `<span class="star-icon text-xl mx-0.5">★</span>`; // Unicode star character
+                    starsHtml += `<span class="star-icon text-xl mx-0.5">★</span>`; // Unicode star character, size controlled by text-xl
                 }
                 const div = document.createElement('div');
                 div.className = "bg-gray-800 p-8 rounded-2xl shadow-xl border border-gray-700 flex flex-col items-center text-center transition-transform transform hover:scale-105 duration-300";
@@ -653,6 +655,8 @@
             t.steps.forEach(step => {
                 const li = document.createElement('li');
                 li.className = `flex items-center text-lg text-gray-300 roadmap-status-${t.roadmapStatus[step]}`;
+                // Ajuste aquí: el tamaño del checkmark es por `font-size` en el CSS.
+                // Ya tiene `text-2xl` aplicado en el CSS global que es pequeño.
                 const icon = t.roadmapStatus[step] === "done" ?
                     '<span class="check-icon mr-3 text-2xl">✔</span>' :
                     '<span class="soon-icon mr-3 text-2xl">🔜</span>';
@@ -674,6 +678,7 @@
                 a.href = social.url;
                 a.target = "_blank";
                 a.rel = "noopener noreferrer";
+                // Ajuste aquí: el tamaño de los enlaces a redes sociales es por `font-size`.
                 a.className = "text-blue-500 hover:text-blue-400 transition-colors duration-200 text-lg md:text-xl font-medium";
                 a.textContent = social.label;
                 socialMediaLinks.appendChild(a);
