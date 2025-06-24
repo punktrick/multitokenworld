@@ -1,981 +1,997 @@
-#!/bin/bash
+// pages/index.js - Script único con todas las funcionalidades integradas para MultitokenWorld
 
-# --- Configuración Inicial ---
-PROJECT_NAME="multitokenworld"
-GITHUB_USERNAME="TU_NOMBRE_DE_USUARIO_GITHUB" # ¡¡¡IMPORTANTE: REEMPLAZA ESTO CON TU NOMBRE DE USUARIO REAL DE GITHUB!!!
+import React, { useState, useEffect } from "react";
+import Head from "next/head"; // Head de Next.js para gestionar el <head> del HTML
 
-echo "Creando el proyecto $PROJECT_NAME..."
-
-# Crea la carpeta del proyecto y navega hacia ella
-mkdir $PROJECT_NAME
-cd $PROJECT_NAME
-
-# --- Inicializar Proyecto Next.js con TypeScript, Tailwind CSS, ESLint y App Router ---
-npx create-next-app . --ts --tailwind --eslint --app --src-dir --use-npm --import-alias "@/*"
-
-echo "Configurando archivos de MultitokenWorld..."
-
-# --- 1. src/app/layout.tsx ---
-cat > src/app/layout.tsx << EOF
-// src/app/layout.tsx
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "@/styles/globals.css";
-
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "MultitokenWorld - Tu Guía Completa del Mundo Cripto",
-  description: "Explora, aprende, simula y crea en el mundo de las criptomonedas. Herramientas de auditoría de contratos, simulador de gas, generador de tokens y más.",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="es" className="dark">
-      <body className={\`\${inter.className} bg-[#0A0A0A] text-white flex flex-col min-h-screen\`}>
-        <Navbar />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-      </body>
-    </html>
-  );
-}
-EOF
-
-# --- 2. src/app/page.tsx (Página Principal) ---
-cat > src/app/page.tsx << EOF
-// src/app/page.tsx
-import Image from "next/image";
-import Link from "next/link";
+// Importa estas librerías si planeas usarlas. Recuerda instalarlas con 'npm install axios ethers'.
+// axios es opcional si usas la API Fetch nativa del navegador, como se hace para CoinGecko.
+// import axios from "axios";
+// ethers es crucial para interactuar con la blockchain (ej. conectar billetera, desplegar contratos).
+// import { ethers } from "ethers"; // Asegúrate de tenerlo instalado: npm install ethers
 
 export default function Home() {
-  return (
-    <div className="relative isolate px-6 pt-14 lg:px-8">
-      {/* Fondo con efecto de luz */}
-      <div
-        className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
-        aria-hidden="true"
-      >
-        <div
-          className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#3B82F6] to-[#06B6D4] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"
-          style={{
-            clipPath:
-              'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-          }}
-        />
-      </div>
+  const [lang, setLang] = useState("es"); // Estado para el idioma
 
-      <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56 text-center">
-        {/* Logo */}
-        <div className="mb-8">
-          <Image
-            src="/multitokenworld-logo.png"
-            alt="MultitokenWorld Logo"
-            width={200}
-            height={200}
-            className="mx-auto"
+  // --- Contenido multilingüe ---
+  const content = {
+    es: {
+      headline: "MultitokenWorld",
+      quote: "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks",
+      subtitle: "Explora, aprende y construye en el mundo cripto. Contratos, tokens, historia, educación y herramientas para todos.",
+      buttons: [
+        { text: "Explorar Contratos", href: "#explorer" },
+        { text: "Generar Token", href: "#generator" },
+        { text: "Glosario Cripto", href: "#glossary" },
+        { text: "Educación y Recursos", href: "#education" },
+        { text: "Precios en Vivo", href: "#live-prices" },
+        { text: "Planes y Precios", href: "#pricing" },
+        { text: "Aportes Voluntarios", href: "#contribute" },
+        { text: "Publicidad", href: "#advertising" }, // NUEVO: Botón para Publicidad
+      ],
+      featuresTitle: "¿Qué puedes hacer aquí?",
+      features: [
+        { title: "📜 Explorar contratos", text: "Visualiza contratos en blockchain y su historia. Aprende cómo funcionan y qué hacen." },
+        { title: "🔧 Generar tokens", text: "Crea tu propio token ERC-20 fácilmente sin saber programar. 100% descentralizado." },
+        { title: "🎓 Educación Web3", text: "Aprende desde cero sobre wallets, claves, Bitcoin, Satoshi Nakamoto, y más." },
+        { title: "📊 Precios en Vivo", text: "Visualiza valores actualizados de tokens y criptomonedas, con gráficos y fuentes oficiales." },
+        { title: "🧠 Glosario Cripto", text: "Consulta definiciones clave del ecosistema blockchain y enlaces confiables." },
+        { title: "📬 Contacto y Publicidad", text: "¿Quieres promocionar tu proyecto? Escríbenos: contacto@multitokenworld.com" }
+      ],
+      pricingTitle: "Planes y Precios",
+      pricingSubtitle: "Elige el plan que mejor se adapte a tus necesidades. Prueba nuestras herramientas gratuitas o accede a funciones avanzadas con nuestros planes premium.",
+      pricingPlans: [
+        {
+          name: "Plan Gratuito",
+          price: "CAD $0",
+          frequency: "/mes",
+          features: [
+            "10 escaneos de contratos/mes",
+            "Generador de tokens (funcionalidad limitada)",
+            "Acceso al glosario y educación básica",
+            "Precios cripto en vivo",
+            "Soporte comunitario"
+          ],
+          buttonText: "Comenzar Gratis",
+          buttonLink: "#generator"
+        },
+        {
+          name: "Plan Premium Básico",
+          price: "CAD $9.99",
+          frequency: "/mes",
+          features: [
+            "50 escaneos de contratos/mes",
+            "Generador de tokens avanzado",
+            "Acceso ilimitado a educación y recursos",
+            "Precios en vivo y análisis básico",
+            "Soporte por email"
+          ],
+          buttonText: "Suscribirse Ahora",
+          buttonLink: "#contact" // O un enlace a tu pasarela de pago
+        },
+        {
+          name: "Plan Premium Pro",
+          price: "CAD $29.99",
+          frequency: "/mes",
+          features: [
+            "Escaneos de contratos ilimitados",
+            "Generador de tokens personalizado",
+            "Todos los recursos educativos y premium",
+            "Análisis avanzado y alertas de precios",
+            "Soporte prioritario 24/7",
+            "Acceso Beta a nuevas herramientas"
+          ],
+          buttonText: "Obtener Pro",
+          buttonLink: "#contact" // O un enlace a tu pasarela de pago
+        }
+      ],
+      contributeTitle: "Aportes Voluntarios",
+      contributeSubtitle: "Tu apoyo ayuda a mantener y mejorar MultitokenWorld. Considera hacer un aporte voluntario.",
+      contributeText: "Puedes apoyar nuestro trabajo enviando un aporte a la siguiente dirección de billetera Ethereum. ¡Cada contribución, grande o pequeña, es muy apreciada!",
+      contributeAddress: "0xEjemploDeTuDireccionDeBilleteraEthereumAqui", // Placeholder, ¡CAMBIAR!
+      contributeSuggested: "Montos Sugeridos: 0.01 ETH, 0.05 ETH, 0.1 ETH (o lo que desees)",
+      testimonialsTitle: "Lo que dicen nuestros usuarios",
+      testimonials: [
+        { quote: "MultitokenWorld es una herramienta fantástica. Me ayudó a entender contratos que antes me parecían imposibles. ¡Totalmente recomendable!", name: "Ana P., Entusiasta Cripto", stars: 5 },
+        { quote: "Pude crear mi propio token ERC-20 en minutos sin escribir una línea de código. La educación es invaluable.", name: "Carlos G., Desarrollador Novato", stars: 5 },
+        { quote: "Los precios en vivo son muy útiles, y el glosario es mi recurso favorito. Es una plataforma muy completa.", name: "Sofía M., Inversora", stars: 4 },
+      ],
+      roadmap: "Roadmap 2025",
+      steps: [
+        "✅ Historia Bitcoin - Listo",
+        "✅ Explorador de contratos - Activo",
+        "✅ Glosario cripto - Implementado",
+        "🔜 Verificación de contratos - En desarrollo",
+        "🔜 Publicidad con cripto - En diseño",
+        "🔜 Dashboard interactivo con TradingView - Planeado",
+        "🔜 Wiki educativa y preguntas frecuentes - Próximamente"
+      ],
+      contactTitle: "Contacto y Publicidad",
+      contactText: "Si tienes preguntas, sugerencias, o estás interesado en opciones de publicidad en MultitokenWorld para tu proyecto cripto o Web3, por favor contáctanos:",
+      contactEmail: "contacto@multitokenworld.com",
+      socialMedia: {
+        twitter: { label: "Twitter/X", url: "https://twitter.com/TuUsuarioDeTwitter" }, // Placeholder
+        facebook: { label: "Facebook", url: "https://facebook.com/TuPaginaDeFacebook" }, // Placeholder
+        instagram: { label: "Instagram", url: "https://instagram.com/TuUsuarioDeInstagram" }, // Placeholder
+      },
+      privacyPolicy: "Política de Privacidad",
+      termsOfService: "Términos de Servicio",
+      footer: "© 2025 MultitokenWorld — Libertad, transparencia y tecnología. Sitio registrado en .COM con CIRA. "
+    },
+    en: {
+      headline: "MultitokenWorld",
+      quote: "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks",
+      subtitle: "Explore, learn and build in the crypto world. Contracts, tokens, history, education and tools for everyone.",
+      buttons: [
+        { text: "Explore Contracts", href: "#explorer" },
+        { text: "Generate Token", href: "#generator" },
+        { text: "Crypto Glossary", href: "#glossary" },
+        { text: "Education & Resources", href: "#education" },
+        { text: "Live Prices", href: "#live-prices" },
+        { text: "Plans & Pricing", href: "#pricing" },
+        { text: "Voluntary Contributions", href: "#contribute" },
+        { text: "Advertising", href: "#advertising" }, // NEW: Button for Advertising
+      ],
+      featuresTitle: "What can you do here?",
+      features: [
+        { title: "📜 Explore contracts", text: "Browse blockchain contracts and their history. Learn how they work and what they do." },
+        { title: "🔧 Generate tokens", text: "Easily create your own ERC-20 token without coding. 100% decentralized." },
+        { title: "🎓 Web3 Education", text: "Learn from scratch about wallets, keys, Bitcoin, Satoshi Nakamoto, and more." },
+        { title: "📊 Live Prices", text: "View real-time prices for tokens and cryptocurrencies, with charts and official sources." },
+        { title: "🧠 Crypto Glossary", text: "Look up key blockchain terms with trusted links and definitions." },
+        { title: "📬 Contact & Advertising", text: "Want to promote your project? Email us: contacto@multitokenworld.com" }
+      ],
+      pricingTitle: "Plans and Pricing",
+      pricingSubtitle: "Choose the plan that best suits your needs. Try our free tools or access advanced features with our premium plans.",
+      pricingPlans: [
+        {
+          name: "Free Plan",
+          price: "CAD $0",
+          frequency: "/month",
+          features: [
+            "10 contract scans/month",
+            "Token generator (limited functionality)",
+            "Access to glossary and basic education",
+            "Live crypto prices",
+            "Community support"
+          ],
+          buttonText: "Start Free",
+          buttonLink: "#generator"
+        },
+        {
+          name: "Basic Premium Plan",
+          price: "CAD $9.99",
+          frequency: "/month",
+          features: [
+            "50 contract scans/month",
+            "Advanced token generator",
+            "Unlimited access to education and resources",
+            "Live prices and basic analysis",
+            "Email support"
+          ],
+          buttonText: "Subscribe Now",
+          buttonLink: "#contact" // Or link to your payment gateway
+        },
+        {
+          name: "Pro Premium Plan",
+          price: "CAD $29.99",
+          frequency: "/month",
+          features: [
+            "Unlimited contract scans",
+            "Custom token generator",
+            "All educational and premium resources",
+            "Advanced analysis and price alerts",
+            "24/7 Priority support",
+            "Beta access to new tools"
+          ],
+          buttonText: "Get Pro",
+          buttonLink: "#contact" // Or link to your payment gateway
+        }
+      ],
+      contributeTitle: "Voluntary Contributions",
+      contributeSubtitle: "Your support helps maintain and improve MultitokenWorld. Please consider making a voluntary contribution.",
+      contributeText: "You can support our work by sending a contribution to the following Ethereum wallet address. Every contribution, big or small, is greatly appreciated!",
+      contributeAddress: "0xExampleOfYourEthereumWalletAddressHere", // CHANGE!
+      contributeSuggested: "Suggested Amounts: 0.01 ETH, 0.05 ETH, 0.1 ETH (or any amount you wish)",
+      testimonialsTitle: "What our users say",
+      testimonials: [
+        { quote: "MultitokenWorld is a fantastic tool. It helped me understand contracts that previously seemed impossible. Highly recommended!", name: "Ana P., Crypto Enthusiast", stars: 5 },
+        { quote: "I was able to create my own ERC-20 token in minutes without writing a single line of code. The education is invaluable.", name: "Carlos G., Novice Developer", stars: 5 },
+        { quote: "Live prices are very useful, and the glossary is my favorite resource. It's a very complete platform.", name: "Sofia M., Investor", stars: 4 },
+      ],
+      roadmap: "Roadmap 2025",
+      steps: [
+        "✅ Bitcoin History - Ready",
+        "✅ Contract Explorer - Active",
+        "✅ Crypto Glossary - Implemented",
+        "🔜 Contract Verification - In development",
+        "🔜 Crypto Ads - In design",
+        "🔜 Interactive Dashboard with TradingView - Planned",
+        "🔜 Educational Wiki and FAQ - Coming soon"
+      ],
+      contactTitle: "Contact & Advertising",
+      contactText: "If you have questions, suggestions, or are interested in advertising opportunities on MultitokenWorld for your crypto or Web3 project, please contact us:",
+      contactEmail: "contacto@multitokenworld.com",
+      socialMedia: {
+        twitter: { label: "Twitter/X", url: "https://twitter.com/YourTwitterHandle" },
+        facebook: { label: "Facebook", url: "https://facebook.com/YourFacebookPage" },
+        instagram: { label: "Instagram", url: "https://instagram.com/YourInstagramHandle" },
+      },
+      privacyPolicy: "Privacy Policy",
+      termsOfService: "Terms of Service",
+      footer: "© 2025 MultitokenWorld — Freedom, transparency and technology. Officially registered under .COM with CIRA. "
+    }
+  };
+
+  const t = content[lang]; // Contenido para el idioma actual
+
+  // --- COMPONENTE INTEGRADO: ContractExplorer ---
+  const ContractExplorer = () => {
+    const componentT = {
+      es: {
+        title: "Explorador de Contratos Blockchain",
+        placeholder: "Introduce la dirección del contrato o el hash de la transacción...",
+        button: "Explorar",
+        disclaimer: "Esta herramienta es para fines educativos y de visualización técnica. No ofrecemos asesoramiento financiero o de inversión. Los datos provienen directamente de la blockchain y pueden requerir interpretación técnica.",
+      },
+      en: {
+        title: "Blockchain Contract Explorer",
+        placeholder: "Enter contract address or transaction hash...",
+        button: "Explore",
+        disclaimer: "This tool is for educational and technical visualization purposes. We do not provide financial or investment advice. Data comes directly from the blockchain and may require technical interpretation.",
+      },
+    };
+    const currentLangContent = componentT[lang];
+
+    const [input, setInput] = useState("");
+    const [contractData, setContractData] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const handleExplore = async () => {
+      setLoading(true);
+      setError(null);
+      setContractData(null);
+      try {
+        // --- Lógica para interactuar con la blockchain (EJ: ethers.js) ---
+        // Aquí es donde usarías ethers.js o web3.js para obtener datos del contrato
+        // const provider = new ethers.JsonRpcProvider("TU_RPC_URL_AQUI_EJ_INFURA_ALCHIMY");
+        // const bytecode = await provider.getCode(input);
+        // setContractData({ bytecode, /* ... más datos */ });
+
+        console.log(`Explorando: ${input}`); // Placeholder de simulación
+        setContractData({ message: currentLangContent.placeholder + " (funcionalidad en desarrollo)" }); // Simulación
+        // --- FIN Lógica para interactuar con la blockchain ---
+
+      } catch (e) {
+        console.error("Error exploring contract:", e);
+        setError(lang === "es" ? "Error al explorar el contrato. Asegúrate de que la dirección sea válida." : "Error exploring contract. Please ensure the address is valid.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <section id="explorer" className="py-20 bg-[#111827] px-6 rounded-xl shadow-lg my-10">
+        <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">{currentLangContent.title}</h2>
+        <div className="max-w-3xl mx-auto p-6 bg-[#0f172a] rounded-lg">
+          <input
+            type="text"
+            className="w-full p-3 mb-4 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={currentLangContent.placeholder}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
           />
-        </div>
-
-        {/* Título Principal */}
-        <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">
-          <span className="text-blue-400">Multi</span>
-          <span className="text-green-400">token</span>
-          <span className="text-white">World</span>
-        </h1>
-
-        {/* Mensaje del Bloque Génesis */}
-        <p className="mt-6 text-lg leading-8 text-gray-400 font-mono">
-          &quot;The Times 03/Jan/2009 Chancellor on brink of second bailout for banks&quot;
-        </p>
-
-        {/* Descripción */}
-        <p className="mt-6 text-lg leading-8 text-gray-300">
-          Tu guía esencial y centro de herramientas para navegar el universo cripto con confianza y conocimiento.
-        </p>
-
-        {/* Botones de Llamada a la Acción */}
-        <div className="mt-10 flex items-center justify-center gap-x-6">
-          <Link
-            href="/learn"
-            className="rounded-md bg-blue-600 px-6 py-3 text-lg font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          <button
+            onClick={handleExplore}
+            disabled={loading || !input}
+            className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed btn-blue"
           >
-            Explora y Aprende
-          </Link>
-          <Link href="/audit" className="text-lg font-semibold leading-6 text-white hover:text-gray-300">
-            Verifica un Contrato <span aria-hidden="true">→</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* Fondo con efecto de luz inferior */}
-      <div
-        className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
-        aria-hidden="true"
-      >
-        <div
-          className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#06B6D4] to-[#3B82F6] opacity-30 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"
-          style={{
-            clipPath:
-              'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
-          }}
-        />
-      </div>
-
-      {/* Sección "¿Qué puedes hacer aquí?" */}
-      <section id="features" className="py-20 bg-[#0A0A0A] px-6 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-12 text-green-300">
-          ¿Qué puedes hacer en MultitokenWorld?
-        </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto text-left">
-          {/* Tarjeta 1: Explorar contratos */}
-          <Link href="/audit" className="block p-8 bg-[#1A1A1A] rounded-xl shadow-lg hover:shadow-blue-500/30 transition-shadow duration-300 transform hover:-translate-y-1">
-            <h3 className="text-2xl font-semibold text-blue-400 mb-3">📜 Auditoría & Verificación de Contratos</h3>
-            <p className="text-white/80">
-              Verifica la seguridad y las características de cualquier contrato inteligente en la blockchain.
-            </p>
-          </Link>
-
-          {/* Tarjeta 2: Generar tokens */}
-          <Link href="/generate" className="block p-8 bg-[#1A1A1A] rounded-xl shadow-lg hover:shadow-green-500/30 transition-shadow duration-300 transform hover:-translate-y-1">
-            <h3 className="text-2xl font-semibold text-green-400 mb-3">🔧 Generador de Contratos Inteligentes</h3>
-            <p className="text-white/80">
-              Crea tu propio token (ERC-20, NFT) fácilmente sin programar.
-            </p>
-          </Link>
-
-          {/* Tarjeta 3: Educación cripto */}
-          <Link href="/learn" className="block p-8 bg-[#1A1A1A] rounded-xl shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 transform hover:-translate-y-1">
-            <h3 className="text-2xl font-semibold text-purple-400 mb-3">🎓 Academia Cripto & Glosario</h3>
-            <p className="text-white/80">
-              Aprende desde cero sobre Web3, DeFi, NFTs y desmitifica el mundo cripto.
-            </p>
-          </Link>
-
-          {/* Tarjeta 4: Simulador de Transacciones */}
-          <Link href="/simulate" className="block p-8 bg-[#1A1A1A] rounded-xl shadow-lg hover:shadow-red-500/30 transition-shadow duration-300 transform hover:-translate-y-1">
-            <h3 className="text-2xl font-semibold text-red-400 mb-3">⛽ Simulador de Gas & Transacciones</h3>
-            <p className="text-white/80">
-              Estima los costos de gas y simula transacciones en diferentes blockchains.
-            </p>
-          </Link>
-
-          {/* Tarjeta 5: Mercados Emergentes */}
-          <Link href="/market-narratives" className="block p-8 bg-[#1A1A1A] rounded-xl shadow-lg hover:shadow-yellow-500/30 transition-shadow duration-300 transform hover:-translate-y-1">
-            <h3 className="text-2xl font-semibold text-yellow-400 mb-3">📈 Panel de Narrativas de Mercado</h3>
-            <p className="text-white/80">
-              Identifica y explora las tendencias y proyectos emergentes en el espacio Web3.
-            </p>
-          </Link>
-
-          {/* Puedes añadir más tarjetas aquí si expandes */}
+            {loading ? (lang === "es" ? "Cargando..." : "Loading...") : currentLangContent.button}
+          </button>
+          {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
+          {contractData && (
+            <div className="mt-6 p-4 bg-gray-700 rounded text-sm">
+              <h3 className="font-semibold text-blue-300 mb-2">{lang === "es" ? "Resultados:" : "Results:"}</h3>
+              <pre className="whitespace-pre-wrap break-words text-gray-200">{JSON.stringify(contractData, null, 2)}</pre>
+            </div>
+          )}
+          <p className="mt-8 text-sm text-gray-400 text-center italic">{currentLangContent.disclaimer}</p>
         </div>
       </section>
-    </div>
-  );
-}
-EOF
+    );
+  };
 
-# --- 3. src/app/audit/page.tsx ---
-mkdir -p src/app/audit
-cat > src/app/audit/page.tsx << EOF
-// src/app/audit/page.tsx
-import React from 'react';
+  // --- COMPONENTE INTEGRADO: TokenGenerator ---
+  const TokenGenerator = () => {
+    const componentT = {
+      es: {
+        title: "Generador de Tokens ERC-20",
+        nameLabel: "Nombre del Token",
+        symbolLabel: "Símbolo del Token (ej. MTW)",
+        supplyLabel: "Suministro Total",
+        decimalsLabel: "Decimales (ej. 18)",
+        button: "Generar Token",
+        disclaimer: "Esta herramienta es para fines educativos y de experimentación técnica sobre la creación de tokens ERC-20. Los tokens generados no tienen valor intrínseco, no son inversiones ofrecidas por MultitokenWorld, y MultitokenWorld no es un exchange ni un intermediario financiero. Eres el único responsable del uso y las implicaciones de cualquier token que crees.",
+        success: "Token generado con éxito (funcionalidad en desarrollo). ID de Transacción: ",
+        error: "Error al generar el token. Asegúrate de tener una billetera conectada y fondos suficientes para el gas.",
+        connectWallet: "Conectar Billetera para Generar",
+      },
+      en: {
+        title: "ERC-20 Token Generator",
+        nameLabel: "Token Name",
+        symbolLabel: "Token Symbol (e.g., MTW)",
+        supplyLabel: "Total Supply",
+        decimalsLabel: "Decimals (e.g., 18)",
+        button: "Generate Token",
+        disclaimer: "This tool is for educational and technical experimentation purposes related to ERC-20 token creation. Tokens generated have no inherent value, are not investments offered by MultitokenWorld, and MultitokenWorld is not an exchange or financial intermediary. You are solely responsible for the use and implications of any token you create.",
+        success: "Token successfully generated (functionality in development). Transaction ID: ",
+        error: "Error generating token. Ensure you have a wallet connected and sufficient funds for gas.",
+        connectWallet: "Connect Wallet to Generate",
+      },
+    };
+    const currentLangContent = componentT[lang];
 
-export default function AuditPage() {
-  return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-blue-400 mb-8">Auditoría y Verificación de Contratos</h1>
-        <p className="text-center text-gray-300 mb-12">
-          Pega la dirección de cualquier contrato inteligente para obtener un análisis rápido de sus características y posibles riesgos.
-          Esta herramienta no es una auditoría de seguridad exhaustiva, sino una verificación de propiedades clave del contrato.
-        </p>
+    const [tokenName, setTokenName] = useState("");
+    const [tokenSymbol, setTokenSymbol] = useState("");
+    const [totalSupply, setTotalSupply] = useState("");
+    const [decimals, setDecimals] = useState("18");
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
+    const [walletConnected, setWalletConnected] = useState(false); // Simulación de conexión de billetera
 
-        <div className="bg-[#1A1A1A] p-8 rounded-xl shadow-lg">
-          <div className="mb-6">
-            <label htmlFor="contractAddress" className="block text-lg font-medium text-gray-200 mb-2">
-              Dirección del Contrato:
-            </label>
-            <input
-              type="text"
-              id="contractAddress"
-              className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg"
-              placeholder="Ej: 0x... (dirección en Ethereum, BSC, Polygon, etc.)"
-            />
-          </div>
+    const handleConnectWallet = async () => {
+      // Aquí iría la lógica para conectar la billetera (ej. usando wagmi/rainbowkit o ethers.js BrowserProvider)
+      // if (window.ethereum) {
+      //   try {
+      //     const provider = new ethers.BrowserProvider(window.ethereum);
+      //     await provider.send("eth_requestAccounts", []);
+      //     setWalletConnected(true);
+      //     setMessage(lang === "es" ? "Billetera conectada." : "Wallet connected.");
+      //   } catch (e) {
+      //     console.error("Error connecting wallet:", e);
+      //     setError(lang === "es" ? "Error al conectar la billetera. Asegúrate de que MetaMask esté instalado." : "Error connecting wallet. Ensure MetaMask is installed.");
+      //   }
+      // } else {
+      //   setError(lang === "es" ? "No se detectó una billetera Ethereum (ej. MetaMask)." : "No Ethereum wallet (e.g., MetaMask) detected.");
+      // }
 
-          <div className="mb-6">
-            <label htmlFor="blockchainNetwork" className="block text-lg font-medium text-gray-200 mb-2">
-              Red Blockchain:
-            </label>
-            <select
-              id="blockchainNetwork"
-              className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-lg"
+      console.log("Conectando billetera...");
+      setWalletConnected(true); // Simulación
+      setMessage(lang === "es" ? "Billetera conectada." : "Wallet connected.");
+    };
+
+    const handleGenerateToken = async () => {
+      if (!walletConnected) {
+        setError(lang === "es" ? "Por favor, conecta tu billetera primero." : "Please connect your wallet first.");
+        return;
+      }
+      setLoading(true);
+      setMessage("");
+      setError("");
+      try {
+        // --- Lógica para desplegar el contrato ERC-20 (EJ: ethers.js) ---
+        // Necesitarás:
+        // 1. Un contrato ERC-20 compilado (ABI y Bytecode) - Puedes usar OpenZeppelin
+        // 2. Un provider de ethers.js conectado a una red (ej. Sepolia para pruebas)
+        // 3. Un signer (tu billetera conectada)
+        // 4. Lógica para desplegar el contrato con los parámetros del formulario
+
+        // Ejemplo (pseudocódigo, requiere el contrato y setup real):
+        /*
+        const provider = new ethers.BrowserProvider(window.ethereum); // Para MetaMask
+        const signer = await provider.getSigner();
+        // ABI de un contrato ERC-20 simple (ejemplo, tendrías tu propio ABI)
+        const ERC20_ABI = [
+            "constructor(string memory name, string memory symbol, uint256 initialSupply, uint8 decimals)",
+            "function name() view returns (string)",
+            "function symbol() view returns (string)",
+            "function totalSupply() view returns (uint256)",
+            "function decimals() view returns (uint8)",
+            "function balanceOf(address account) view returns (uint256)",
+            "function transfer(address recipient, uint256 amount) returns (bool)",
+            "event Transfer(address indexed from, address indexed to, uint256 value)"
+        ];
+        // Bytecode de un contrato ERC-20 compilado (esto sería muy largo en realidad)
+        const ERC20_BYTECODE = "0x..."; // Tu bytecode aquí
+        const factory = new ethers.ContractFactory(ERC20_ABI, ERC20_BYTECODE, signer);
+        const contract = await factory.deploy(tokenName, tokenSymbol, ethers.parseUnits(totalSupply, decimals));
+        await contract.waitForDeployment();
+        setMessage(currentLangContent.success + contract.deploymentTransaction().hash);
+        */
+
+        // Simulación de despliegue
+        const txHash = `0x${Math.random().toString(16).slice(2, 12)}...`;
+        setMessage(currentLangContent.success + txHash);
+
+        // --- FIN Lógica para desplegar el contrato ERC-20 ---
+
+      } catch (e) {
+        console.error("Error generating token:", e);
+        setError(currentLangContent.error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <section id="generator" className="py-20 bg-[#111827] px-6 rounded-xl shadow-lg my-10">
+        <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">{currentLangContent.title}</h2>
+        <div className="max-w-2xl mx-auto p-8 bg-[#0f172a] rounded-lg">
+          {!walletConnected ? (
+            <button
+              onClick={handleConnectWallet}
+              className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-3 px-4 rounded shadow btn-purple"
             >
-              <option value="ethereum">Ethereum Mainnet</option>
-              <option value="bsc">BNB Smart Chain (BSC)</option>
-              <option value="polygon">Polygon Mainnet</option>
-              <option value="arbitrum">Arbitrum One</option>
-              <option value="avalanche">Avalanche C-Chain</option>
-              {/* Agrega más redes según las APIs que uses */}
-            </select>
-          </div>
-
-          <button
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-300"
-          >
-            Verificar Contrato
-          </button>
-
-          <div className="mt-10 p-6 bg-[#0A0A0A] border border-gray-700 rounded-lg">
-            <h3 className="text-xl font-semibold text-green-300 mb-4">Resultados de la Verificación:</h3>
-            {/* Aquí se mostrarán los resultados dinámicamente con JavaScript/React */}
-            <p className="text-gray-400">
-              * El análisis se realizará al hacer clic en &quot;Verificar Contrato&quot;.
-            </p>
-            <ul className="mt-4 space-y-2 text-gray-300">
-              <li><strong>Nombre del Token:</strong> <span className="text-gray-500">[N/A]</span></li>
-              <li><strong>Símbolo:</strong> <span className="text-gray-500">[N/A]</span></li>
-              <li><strong>Suministro Total:</strong> <span className="text-gray-500">[N/A]</span></li>
-              <li><strong>Código Verificado en Etherscan:</strong> <span className="text-yellow-500">Pendiente</span></li>
-              <li><strong>Funcionalidad Mintable:</strong> <span className="text-yellow-500">Pendiente</span></li>
-              <li><strong>Funcionalidad Burnable:</strong> <span className="text-yellow-500">Pendiente</span></li>
-              <li><strong>Pausable:</strong> <span className="text-yellow-500">Pendiente</span></li>
-              <li><strong>Propiedad Renunciada (Ownership Renounced):</strong> <span className="text-yellow-500">Pendiente</span></li>
-              {/* Más resultados aquí */}
-            </ul>
-            <p className="mt-6 text-sm text-red-400">
-              Descargo de responsabilidad: MultitokenWorld no proporciona asesoramiento financiero ni de seguridad. Realiza siempre tu propia investigación.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-EOF
-
-# --- 4. src/app/simulate/page.tsx ---
-mkdir -p src/app/simulate
-cat > src/app/simulate/page.tsx << EOF
-// src/app/simulate/page.tsx
-import React from 'react';
-
-export default function SimulatePage() {
-  return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-red-400 mb-8">Simulador de Transacciones y Gas Fees</h1>
-        <p className="text-center text-gray-300 mb-12">
-          Estima los costos de gas y la velocidad de las transacciones en diferentes redes blockchain en tiempo real.
-        </p>
-
-        <div className="bg-[#1A1A1A] p-8 rounded-xl shadow-lg">
-          <div className="mb-6">
-            <label htmlFor="simNetwork" className="block text-lg font-medium text-gray-200 mb-2">
-              Red Blockchain:
-            </label>
-            <select
-              id="simNetwork"
-              className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-red-500 focus:border-red-500 text-lg"
-            >
-              <option value="ethereum">Ethereum Mainnet</option>
-              <option value="polygon">Polygon Mainnet</option>
-              <option value="bsc">BNB Smart Chain (BSC)</option>
-              <option value="arbitrum">Arbitrum One</option>
-              {/* Añade más redes según las APIs que integres */}
-            </select>
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="transactionType" className="block text-lg font-medium text-gray-200 mb-2">
-              Tipo de Transacción:
-            </label>
-            <select
-              id="transactionType"
-              className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-red-500 focus:border-red-500 text-lg"
-            >
-              <option value="transfer">Transferencia de Token (simple)</option>
-              <option value="swap">Swap en DEX (ej. Uniswap)</option>
-              <option value="nft-mint">Mint de NFT</option>
-              {/* Añade más tipos de transacción */}
-            </select>
-          </div>
-
-          <div className="mb-6">
-            <label htmlFor="amount" className="block text-lg font-medium text-gray-200 mb-2">
-              Monto (opcional, para estimación de impacto):
-            </label>
-            <input
-              type="number"
-              id="amount"
-              className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-red-500 focus:border-red-500 text-lg"
-              placeholder="Ej: 1 (token)"
-            />
-          </div>
-
-          <button
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-300"
-          >
-            Estimar Costos
-          </button>
-
-          <div className="mt-10 p-6 bg-[#0A0A0A] border border-gray-700 rounded-lg">
-            <h3 className="text-xl font-semibold text-green-300 mb-4">Estimación Actual:</h3>
-            {/* Aquí se mostrarán los resultados dinámicamente con JavaScript/React */}
-            <ul className="space-y-2 text-gray-300">
-              <li><strong>Costo de Gas Estimado:</strong> <span className="text-gray-500">[N/A]</span></li>
-              <li><strong>En USD:</strong> <span className="text-gray-500">[N/A]</span></li>
-              <li><strong>Velocidad Estimada:</strong> <span className="text-gray-500">[N/A]</span></li>
-              <li><strong>Precio del Gas (Gwei):</strong> <span className="text-gray-500">[N/A]</span></li>
-              <li><strong>Gas Limit (aprox.):</strong> <span className="text-gray-500">[N/A]</span></li>
-            </ul>
-            <p className="mt-6 text-sm text-red-400">
-              Los costos de gas pueden variar rápidamente. Esta es solo una estimación educativa.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-EOF
-
-# --- 5. src/app/generate/page.tsx ---
-mkdir -p src/app/generate
-cat > src/app/generate/page.tsx << EOF
-// src/app/generate/page.tsx
-import React from 'react';
-
-export default function GeneratePage() {
-  return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-green-400 mb-8">Generador de Contratos Inteligentes</h1>
-        <p className="text-center text-gray-300 mb-12">
-          Crea el código fuente para tu propio token ERC-20 o NFT (ERC-721) fácilmente, sin escribir una sola línea de código.
-        </p>
-
-        <div className="bg-[#1A1A1A] p-8 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-semibold text-gray-100 mb-6">Configura tu Contrato:</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label htmlFor="contractType" className="block text-lg font-medium text-gray-200 mb-2">
-                Tipo de Contrato:
-              </label>
-              <select
-                id="contractType"
-                className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-green-500 focus:border-green-500 text-lg"
-              >
-                <option value="erc20">ERC-20 (Token Fungible)</option>
-                <option value="erc721">ERC-721 (NFT - Token No Fungible)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label htmlFor="tokenName" className="block text-lg font-medium text-gray-200 mb-2">
-                Nombre del Token:
-              </label>
-              <input
-                type="text"
-                id="tokenName"
-                className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-green-500 focus:border-green-500 text-lg"
-                placeholder="Ej: MultitokenCoin"
-              />
-            </div>
-            <div>
-              <label htmlFor="tokenSymbol" className="block text-lg font-medium text-gray-200 mb-2">
-                Símbolo del Token:
-              </label>
-              <input
-                type="text"
-                id="tokenSymbol"
-                className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-green-500 focus:border-green-500 text-lg"
-                placeholder="Ej: MTC"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label htmlFor="initialSupply" className="block text-lg font-medium text-gray-200 mb-2">
-                Suministro Inicial (ERC-20):
-              </label>
-              <input
-                type="number"
-                id="initialSupply"
-                className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-green-500 focus:border-green-500 text-lg"
-                placeholder="Ej: 1000000"
-              />
-            </div>
-            <div>
-              <label htmlFor="decimals" className="block text-lg font-medium text-gray-200 mb-2">
-                Decimales (ERC-20):
-              </label>
-              <input
-                type="number"
-                id="decimals"
-                className="w-full p-3 bg-[#0A0A0A] border border-gray-700 rounded-lg focus:ring-green-500 focus:border-green-500 text-lg"
-                placeholder="Ej: 18"
-              />
-            </div>
-          </div>
-
-          <h3 className="text-xl font-semibold text-gray-100 mb-4">Funciones Adicionales (Opcional):</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-            <div className="flex items-center">
-              <input type="checkbox" id="mintable" className="h-5 w-5 text-green-500 rounded border-gray-600 focus:ring-green-500" />
-              <label htmlFor="mintable" className="ml-2 text-gray-300">Mintable (Se pueden crear más tokens)</label>
-            </div>
-            <div className="flex items-center">
-              <input type="checkbox" id="burnable" className="h-5 w-5 text-green-500 rounded border-gray-600 focus:ring-green-500" />
-              <label htmlFor="burnable" className="ml-2 text-gray-300">Burnable (Se pueden quemar tokens)</label>
-            </div>
-            <div className="flex items-center">
-              <input type="checkbox" id="pausable" className="h-5 w-5 text-green-500 rounded border-gray-600 focus:ring-green-500" />
-              <label htmlFor="pausable" className="ml-2 text-gray-300">Pausable (Se pueden pausar transferencias)</label>
-            </div>
-            <div className="flex items-center">
-              <input type="checkbox" id="ownable" className="h-5 w-5 text-green-500 rounded border-gray-600 focus:ring-green-500" />
-              <label htmlFor="ownable" className="ml-2 text-gray-300">Ownable (El contrato tiene un propietario)</label>
-            </div>
-          </div>
-
-          <button
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg text-lg transition duration-300"
-          >
-            Generar Código del Contrato
-          </button>
-
-          <div className="mt-10 p-6 bg-[#0A0A0A] border border-gray-700 rounded-lg">
-            <h3 className="text-xl font-semibold text-blue-300 mb-4">Código Solidity Generado:</h3>
-            <pre className="bg-gray-900 text-gray-200 p-4 rounded-lg overflow-x-auto text-sm">
-              <code className="whitespace-pre-wrap">
-                {\`// El código de tu contrato Solidity aparecerá aquí.
-// Ejemplo para ERC-20 básico:
-
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
-contract MyToken is ERC20 {
-    constructor(uint256 initialSupply) ERC20("MyTokenName", "MTN") {
-        _mint(msg.sender, initialSupply);
-    }
-}
-
-// Recuerda instalar @openzeppelin/contracts si usas importaciones:
-// npm install @openzeppelin/contracts
-
-// Disclaimer: Este código es solo un ejemplo.
-// Es tu responsabilidad auditar y asegurar tu contrato antes de desplegarlo.
-// MultitokenWorld no se hace responsable por el uso o mal uso del código generado.
-\`}
-              </code>
-            </pre>
-            <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition duration-300">
-              Copiar Código
+              {currentLangContent.connectWallet}
             </button>
-
-            <div className="mt-6 text-sm text-yellow-400 border border-yellow-400 p-4 rounded-lg">
-              <strong>Pasos Siguientes Importantes:</strong>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>1. Copia este código.</li>
-                <li>2. Usa un IDE como <a href="https://remix.ethereum.org/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Remix IDE</a> para compilar y desplegar tu contrato.</li>
-                <li>3. ¡Siempre haz tu propia investigación (DYOR) y considera una auditoría profesional antes de cualquier lanzamiento público!</li>
-                <li>4. MultitokenWorld solo genera código; no despliega contratos ni gestiona tus activos.</li>
-              </ul>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="tokenName" className="block text-blue-300 text-sm font-bold mb-2">{currentLangContent.nameLabel}:</label>
+                <input
+                  type="text"
+                  id="tokenName"
+                  className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={tokenName}
+                  onChange={(e) => setTokenName(e.target.value)}
+                  placeholder="Mi Token World"
+                />
+              </div>
+              <div>
+                <label htmlFor="tokenSymbol" className="block text-blue-300 text-sm font-bold mb-2">{currentLangContent.symbolLabel}:</label>
+                <input
+                  type="text"
+                  id="tokenSymbol"
+                  className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={tokenSymbol}
+                  onChange={(e) => setTokenSymbol(e.target.value)}
+                  placeholder="MTW"
+                />
+              </div>
+              <div>
+                <label htmlFor="totalSupply" className="block text-blue-300 text-sm font-bold mb-2">{currentLangContent.supplyLabel}:</label>
+                <input
+                  type="number"
+                  id="totalSupply"
+                  className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={totalSupply}
+                  onChange={(e) => setTotalSupply(e.target.value)}
+                  placeholder="1000000"
+                />
+              </div>
+              <div>
+                <label htmlFor="decimals" className="block text-blue-300 text-sm font-bold mb-2">{currentLangContent.decimalsLabel}:</label>
+                <input
+                  type="number"
+                  id="decimals"
+                  className="w-full p-3 rounded bg-gray-800 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={decimals}
+                  onChange={(e) => setDecimals(e.target.value)}
+                  placeholder="18"
+                />
+              </div>
+              <button
+                onClick={handleGenerateToken}
+                disabled={loading || !tokenName || !tokenSymbol || !totalSupply || !decimals}
+                className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed btn-green"
+              >
+                {loading ? (lang === "es" ? "Generando..." : "Generating...") : currentLangContent.button}
+              </button>
+              {message && <p className="text-blue-300 mt-4 text-center">{message}</p>}
+              {error && <p className="text-red-400 mt-4 text-center">{error}</p>}
             </div>
+          )}
+          <p className="mt-8 text-sm text-gray-400 text-center italic">{currentLangContent.disclaimer}</p>
+        </div>
+      </section>
+    );
+  };
+
+  // --- COMPONENTE INTEGRADO: CryptoPrices ---
+  const CryptoPrices = () => {
+    const [prices, setPrices] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const cryptos = [
+        "bitcoin",
+        "ethereum",
+        "solana",
+        "cardano",
+        "dogecoin",
+    ];
+
+    useEffect(() => {
+        const fetchPrices = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const ids = cryptos.join(",");
+                const currency = "usd";
+                // Usar fetch API directamente, si no quieres axios
+                const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${currency}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                setPrices(data);
+
+            } catch (e) {
+                console.error("Error fetching crypto prices:", e);
+                setError(lang === "es" ? "Error al cargar los precios. Inténtalo de nuevo más tarde." : "Error loading prices. Please try again later.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPrices();
+        const intervalId = setInterval(fetchPrices, 60000); // Actualizar cada 60 segundos
+
+        return () => clearInterval(intervalId); // Limpiar el intervalo al desmontar
+    }, [lang]); // Dependencia 'lang' para recargar si cambia el idioma
+
+    const componentT = {
+        es: {
+            title: "Precios de Criptomonedas en Vivo",
+            loading: "Cargando precios...",
+            disclaimer: "Los precios mostrados son solo para fines informativos y educativos. Pueden no reflejar el valor de mercado exacto debido a la latencia de la API y no constituyen asesoramiento de inversión.",
+        },
+        en: {
+            title: "Live Cryptocurrency Prices",
+            loading: "Loading prices...",
+            disclaimer: "Prices shown are for informational and educational purposes only. They may not reflect exact real-time market value due to API latency and do not constitute investment advice.",
+        },
+    };
+
+    const currentLangContent = componentT[lang];
+
+    return (
+        <section id="live-prices" className="py-16 border-t border-gray-700 bg-[#111827] px-6 rounded-xl shadow-lg my-10">
+            <h2 className="text-3xl font-semibold mb-10 text-center text-green-300">{currentLangContent.title}</h2>
+            <div className="max-w-4xl mx-auto bg-[#1e293b] p-8 rounded-xl shadow-lg">
+                {loading && <p className="text-center text-blue-300">{currentLangContent.loading}</p>}
+                {error && <p className="text-center text-red-400">{error}</p>}
+                {!loading && !error && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Object.keys(prices).map((cryptoId) => (
+                            <div key={cryptoId} className="bg-[#0f172a] p-5 rounded-lg flex items-center justify-between shadow">
+                                <span className="text-lg font-medium capitalize text-blue-300">{cryptoId}</span>
+                                <span className="text-xl font-bold text-green-400">
+                                    ${prices[cryptoId].usd.toFixed(2)} USD
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <p className="mt-8 text-sm text-gray-400 text-center italic">
+                    {currentLangContent.disclaimer}
+                </p>
+            </div>
+        </section>
+    );
+  };
+
+  // --- COMPONENTE INTEGRADO: CryptoEducation ---
+  const CryptoEducation = () => {
+    const componentT = {
+        es: {
+            title: "Educación Web3 y Recursos",
+            intro: "Aprende los fundamentos del mundo descentralizado. Aquí encontrarás guías sobre cómo funciona Web3, las billeteras digitales y por qué son importantes.",
+            walletsTitle: "Billeteras Cripto Recomendadas",
+            walletsIntro: "Para interactuar con la blockchain y gestionar tus activos, necesitarás una billetera digital. Estas son algunas de las opciones más populares y seguras para empezar:",
+            wallets: [
+                {
+                    name: "MetaMask",
+                    description: "Una billetera de navegador fácil de usar para Ethereum y redes compatibles. Esencial para interactuar con DApps.",
+                    link: "https://metamask.io/", // Considera añadir enlace de afiliado aquí con divulgación
+                    linkText: "Descargar MetaMask",
+                },
+                {
+                    name: "Trust Wallet",
+                    description: "Una billetera móvil segura y multi-cadena, ideal para gestionar una amplia variedad de criptomonedas y NFTs.",
+                    link: "https://trustwallet.com/", // Considera añadir enlace de afiliado aquí con divulgación
+                    linkText: "Descargar Trust Wallet",
+                },
+            ],
+            exchangeTitle: "Plataformas para Comprar/Vender Criptos (Recursos Externos)",
+            exchangeIntro: "MultitokenWorld es una plataforma educativa. Si deseas adquirir criptomonedas (como ETH para gas) o intercambiar activos, necesitarás una plataforma de terceros. **Recuerda:** Investiga a fondo antes de usar cualquier servicio y comprende los riesgos.",
+            exchanges: [
+                {
+                    name: "Wchange", // Reemplaza con el nombre real de tu afiliado si es diferente
+                    description: "Una plataforma donde puedes comprar, vender e intercambiar criptomonedas. (Ejemplo: Asegúrate de leer sus términos y condiciones).",
+                    link: "https://wchange.com", // Reemplaza con el enlace de afiliado real si aplica
+                    linkText: "Ir a Wchange",
+                },
+                // Añade más exchanges si lo deseas
+            ],
+            disclaimerWallets: "MultitokenWorld recomienda estas billeteras con fines educativos y de facilidad de uso. No custodiamos tus fondos y no somos responsables de la seguridad de tus billeteras personales. Siempre protege tu frase semilla.",
+            disclaimerExchanges: "MultitokenWorld NO es un exchange, ni un asesor financiero, ni un intermediario de valores. Los enlaces a plataformas de terceros son solo para fines informativos y de referencia. Cualquier transacción o interacción en plataformas externas es bajo tu propia responsabilidad y riesgo. El mercado de criptoactivos es altamente volátil y conlleva riesgo de pérdida de capital.",
+            affiliateDisclosure: "Divulgación de Afiliados: Algunos enlaces en esta sección pueden ser enlaces de afiliados, lo que significa que podríamos ganar una pequeña comisión si realizas una acción (como una descarga o registro) a través de ellos, sin costo adicional para ti. Esto nos ayuda a mantener MultitokenWorld operativo.",
+        },
+        en: {
+            title: "Web3 Education & Resources",
+            intro: "Learn the fundamentals of the decentralized world. Here you'll find guides on how Web3 works, digital wallets, and why they are important.",
+            walletsTitle: "Recommended Crypto Wallets",
+            walletsIntro: "To interact with the blockchain and manage your assets, you'll need a digital wallet. These are some of the most popular and secure options to get started:",
+            wallets: [
+                {
+                    name: "MetaMask",
+                    description: "An easy-to-use browser wallet for Ethereum and compatible networks. Essential for interacting with DApps.",
+                    link: "https://metamask.io/",
+                    linkText: "Download MetaMask",
+                },
+                {
+                    name: "Trust Wallet",
+                    description: "A secure, multi-chain mobile wallet, ideal for managing a wide variety of cryptocurrencies and NFTs.",
+                    link: "https://trustwallet.com/",
+                    linkText: "Download Trust Wallet",
+                },
+            ],
+            exchangeTitle: "Platforms to Buy/Sell Cryptos (External Resources)",
+            exchangeIntro: "MultitokenWorld is an educational platform. If you wish to acquire cryptocurrencies (like ETH for gas) or exchange assets, you will need a third-party platform. **Remember:** Research thoroughly before using any service and understand the risks.",
+            exchanges: [
+                {
+                    name: "Wchange",
+                    description: "A platform where you can buy, sell, and exchange cryptocurrencies. (Example: Be sure to read their terms and conditions).",
+                    link: "https://wchange.com",
+                    linkText: "Go to Wchange",
+                },
+            ],
+            disclaimerWallets: "MultitokenWorld recommends these wallets for educational purposes and ease of use. We do not custody your funds and are not responsible for the security of your personal wallets. Always protect your seed phrase.",
+            disclaimerExchanges: "MultitokenWorld is NOT an exchange, financial advisor, or securities intermediary. Links to third-party platforms are for informational and reference purposes only. Any transactions or interactions on external platforms are at your own risk and responsibility. The crypto asset market is highly volatile and carries the risk of capital loss.",
+            affiliateDisclosure: "Affiliate Disclosure: Some links in this section may be affiliate links, meaning we might earn a small commission if you take an action (such as a download or signup) through them, at no additional cost to you. This helps us keep MultitokenWorld running.",
+        },
+    };
+    const currentLangContent = componentT[lang];
+
+    return (
+      <section id="education" className="py-20 bg-[#111827] px-6 rounded-xl shadow-lg my-10">
+        <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">{currentLangContent.title}</h2>
+        <div className="max-w-5xl mx-auto bg-[#0f172a] p-8 rounded-lg space-y-12">
+
+          <p className="text-lg text-gray-300 text-center mb-10">{currentLangContent.intro}</p>
+
+          {/* Sección de Billeteras */}
+          <div>
+            <h3 className="text-2xl font-semibold mb-6 text-blue-300 text-center">{currentLangContent.walletsTitle}</h3>
+            <p className="text-md text-gray-400 text-center mb-8">{currentLangContent.walletsIntro}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {currentLangContent.wallets.map((wallet, index) => (
+                <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <h4 className="text-xl font-bold text-green-400 mb-2">{wallet.name}</h4>
+                  <p className="text-gray-300 mb-4">{wallet.description}</p>
+                  <a href={wallet.link} target="_blank" rel="noopener noreferrer" className="inline-block bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded btn-blue">
+                    {wallet.linkText}
+                  </a>
+                </div>
+              ))}
+            </div>
+            <p className="mt-8 text-sm text-gray-400 text-center italic">{currentLangContent.disclaimerWallets}</p>
+          </div>
+
+          {/* Sección de Exchanges */}
+          <div className="border-t border-gray-700 pt-10">
+            <h3 className="text-2xl font-semibold mb-6 text-blue-300 text-center">{currentLangContent.exchangeTitle}</h3>
+            <p className="text-md text-gray-400 text-center mb-8">{currentLangContent.exchangeIntro}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {currentLangContent.exchanges.map((exchange, index) => (
+                <div key={index} className="bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+                  <h4 className="text-xl font-bold text-green-400 mb-2">{exchange.name}</h4>
+                  <p className="text-gray-300 mb-4">{exchange.description}</p>
+                  <a href={exchange.link} target="_blank" rel="noopener noreferrer" className="inline-block bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded btn-green">
+                    {exchange.linkText}
+                  </a>
+                </div>
+              ))}
+            </div>
+            <p className="mt-8 text-sm text-red-400 text-center italic font-bold">{currentLangContent.disclaimerExchanges}</p>
+            <p className="mt-4 text-xs text-gray-500 text-center italic">{currentLangContent.affiliateDisclosure}</p>
           </div>
         </div>
+      </section>
+    );
+  };
+
+  // --- NUEVO COMPONENTE: Advertising (Publicidad) ---
+  const Advertising = () => {
+    const componentT = {
+      es: {
+        title: "Publicidad en MultitokenWorld",
+        intro: "¿Tienes un proyecto cripto o Web3 que quieres destacar? MultitokenWorld te ofrece una plataforma vibrante para conectar con nuestra creciente comunidad de entusiastas y constructores del ecosistema descentralizado.",
+        benefitsTitle: "Beneficios de la Publicidad con Nosotros",
+        benefits: [
+          "Acceso directo a una audiencia niche interesada en blockchain, DeFi, NFTs y Web3.",
+          "Opciones de banners en ubicaciones estratégicas de la plataforma.",
+          "Artículos patrocinados y menciones en nuestro contenido educativo.",
+          "Promoción en nuestras redes sociales y boletines informativos (opcional).",
+          "Análisis de rendimiento de la campaña (disponible en planes premium)."
+        ],
+        contactPrompt: "Interesado en una colaboración o necesitas más información sobre nuestros paquetes de publicidad? Contáctanos directamente:",
+        email: "contacto@multitokenworld.com",
+        callToAction: "¡Impulsa tu proyecto cripto hoy!",
+        disclaimer: "MultitokenWorld se reserva el derecho de revisar y aprobar todos los anuncios para asegurar que se alineen con nuestros valores de transparencia y seguridad. No garantizamos el éxito de las campañas de publicidad ni actuamos como asesores de inversión para los proyectos anunciados.",
+      },
+      en: {
+        title: "Advertising on MultitokenWorld",
+        intro: "Do you have a crypto or Web3 project you want to highlight? MultitokenWorld offers you a vibrant platform to connect with our growing community of decentralized ecosystem enthusiasts and builders.",
+        benefitsTitle: "Benefits of Advertising with Us",
+        benefits: [
+          "Direct access to a niche audience interested in blockchain, DeFi, NFTs, and Web3.",
+          "Banner options in strategic locations on the platform.",
+          "Sponsored articles and mentions in our educational content.",
+          "Promotion on our social media and newsletters (optional).",
+          "Campaign performance analysis (available with premium plans)."
+        ],
+        contactPrompt: "Interested in a collaboration or need more information about our advertising packages? Contact us directly:",
+        email: "contacto@multitokenworld.com",
+        callToAction: "Boost your crypto project today!",
+        disclaimer: "MultitokenWorld reserves the right to review and approve all advertisements to ensure they align with our values of transparency and security. We do not guarantee the success of advertising campaigns nor do we act as investment advisors for advertised projects.",
+      },
+    };
+    const currentLangContent = componentT[lang];
+
+    return (
+      <section id="advertising" className="py-20 bg-[#111827] px-6 rounded-xl shadow-lg my-10">
+        <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">{currentLangContent.title}</h2>
+        <div className="max-w-4xl mx-auto bg-[#0f172a] p-8 rounded-lg space-y-8">
+          <p className="text-lg text-gray-300 text-center">{currentLangContent.intro}</p>
+
+          <div>
+            <h3 className="text-2xl font-semibold mb-4 text-blue-300">{currentLangContent.benefitsTitle}</h3>
+            <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
+              {currentLangContent.benefits.map((benefit, index) => (
+                <li key={index}>{benefit}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="text-center">
+            <p className="text-lg text-gray-300 mb-4">{currentLangContent.contactPrompt}</p>
+            <a href={`mailto:${currentLangContent.email}`} className="inline-block bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-lg text-xl shadow-md btn-blue">
+              {currentLangContent.email}
+            </a>
+            <p className="mt-6 text-xl font-bold text-green-400">{currentLangContent.callToAction}</p>
+          </div>
+          <p className="mt-8 text-sm text-gray-400 text-center italic">{currentLangContent.disclaimer}</p>
+        </div>
+      </section>
+    );
+  };
+
+
+  // Función para renderizar estrellas de testimonio
+  const renderStars = (numStars) => {
+    return (
+      <div className="flex justify-center mt-2">
+        {[...Array(5)].map((_, i) => (
+          <svg
+            key={i}
+            className={`w-5 h-5 ${i < numStars ? 'text-yellow-400' : 'text-gray-600'}`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.683-1.543 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.788.565-1.843-.198-1.543-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.92 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
+          </svg>
+        ))}
       </div>
-    </div>
-  );
-}
-EOF
+    );
+  };
 
-# --- 6. src/app/learn/page.tsx ---
-mkdir -p src/app/learn
-cat > src/app/learn/page.tsx << EOF
-// src/app/learn/page.tsx
-import React from 'react';
-import Link from 'next/link';
-
-export default function LearnPage() {
-  const glossaryTerms = [
-    { term: "Blockchain", description: "Un libro mayor digital descentralizado y distribuido que registra transacciones.", link: "#" },
-    { term: "DeFi", description: "Finanzas Descentralizadas, un ecosistema de aplicaciones financieras construidas sobre blockchain.", link: "#" },
-    { term: "NFT", description: "Token No Fungible, un activo digital único que representa la propiedad de un ítem.", link: "#" },
-    { term: "Gas Fee", description: "La tarifa pagada a los mineros/validadores por procesar transacciones en una red blockchain.", link: "#" },
-    { term: "Wallet", description: "Una cartera digital para almacenar, enviar y recibir criptomonedas y NFTs.", link: "#" },
-    { term: "Smart Contract", description: "Contratos auto-ejecutables con los términos del acuerdo escritos directamente en código.", link: "#" },
-    { term: "DAO", description: "Organización Autónoma Descentralizada, una organización gobernada por código y sus miembros.", link: "#" },
-    // Agrega más términos
-  ];
-
-  const topics = [
-    { title: "Introducción a Web3", description: "Descubre los fundamentos de la nueva era de internet.", link: "#" },
-    { title: "Cómo funciona una transacción Blockchain", description: "Un desglose paso a paso de lo que ocurre detrás de escena.", link: "#" },
-    { title: "Tipos de Wallets y su seguridad", description: "Explora las diferencias entre wallets frías y calientes.", link: "#" },
-    { title: "Entendiendo el Staking y Yield Farming", description: "Cómo ganar ingresos pasivos con tus criptoactivos.", link: "#" },
-    // Agrega más temas
-  ];
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-purple-400 mb-8">Academia Cripto y Glosario</h1>
-        <p className="text-center text-gray-300 mb-12">
-          Tu punto de partida para entender el fascinante mundo de las criptomonedas, blockchain y Web3.
-        </p>
+    <>
+      <Head>
+        <title>{t.headline}</title>
+        <meta name="description" content={t.subtitle} />
+        <link rel="icon" href="/favicon.ico" />
+        {/* Fuente Inter de Google Fonts */}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+      </Head>
 
-        <section className="mb-12 bg-[#1A1A1A] p-8 rounded-xl shadow-lg">
-          <h2 className="text-3xl font-semibold text-gray-100 mb-6 text-center">Glosario de Términos Cripto</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {glossaryTerms.map((item, index) => (
-              <div key={index} className="bg-[#0A0A0A] p-6 rounded-lg border border-gray-700">
-                <h3 className="text-xl font-semibold text-blue-300 mb-2">{item.term}</h3>
-                <p className="text-gray-300">{item.description}</p>
-                {item.link && (
-                  <Link href={item.link} className="text-purple-400 hover:underline mt-2 inline-block text-sm">
-                    Leer más
-                  </Link>
-                )}
+      {/* Selector de Idioma */}
+      <div className="absolute top-4 right-4 z-50">
+        <select
+          value={lang}
+          onChange={(e) => setLang(e.target.value)}
+          className="p-2 rounded-md bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <main className="flex flex-col items-center justify-center min-h-screen py-2 bg-[#0f172a] text-white">
+        {/* Sección de Héroe */}
+        <section className="text-center py-20 px-4 max-w-4xl">
+          <p className="text-sm italic text-gray-400 mb-4 font-mono">{t.quote}</p>
+          <h1 className="text-5xl md:text-7xl font-extrabold text-green-400 mb-4 leading-tight">
+            {t.headline}
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            {t.subtitle}
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            {t.buttons.map((button, index) => (
+              <a
+                key={index}
+                href={button.href}
+                className="bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all duration-300 transform hover:scale-105 btn-gradient"
+              >
+                {button.text}
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* Sección de Características */}
+        <section className="w-full max-w-6xl py-20 px-6 bg-[#1e293b] rounded-xl shadow-2xl my-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">
+            {t.featuresTitle}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {t.features.map((feature, index) => (
+              <div
+                key={index}
+                className="bg-[#0f172a] p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300"
+              >
+                <h3 className="text-xl font-bold text-blue-300 mb-2">{feature.title}</h3>
+                <p className="text-gray-300">{feature.text}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="bg-[#1A1A1A] p-8 rounded-xl shadow-lg">
-          <h2 className="text-3xl font-semibold text-gray-100 mb-6 text-center">Temas Fundamentales</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {topics.map((item, index) => (
-              <div key={index} className="bg-[#0A0A0A] p-6 rounded-lg border border-gray-700">
-                <h3 className="text-xl font-semibold text-green-300 mb-2">{item.title}</h3>
-                <p className="text-gray-300">{item.description}</p>
-                {item.link && (
-                  <Link href={item.link} className="text-purple-400 hover:underline mt-2 inline-block text-sm">
-                    Comenzar
-                  </Link>
-                )}
-              </div>
-            ))}
-          </div>
-          <p className="mt-8 text-center text-gray-400">¡Más artículos y cursos se añadirán pronto!</p>
-        </section>
-      </div>
-    </div>
-  );
-}
-EOF
+        {/* Renderizado de Componentes Integrados */}
+        <ContractExplorer />
+        <TokenGenerator />
+        <CryptoPrices />
+        <CryptoEducation />
+        <Advertising /> {/* NUEVO: Incluye el componente de Publicidad */}
 
-# --- 7. src/app/market-narratives/page.tsx ---
-mkdir -p src/app/market-narratives
-cat > src/app/market-narratives/page.tsx << EOF
-// src/app/market-narratives/page.tsx
-import React from 'react';
-import Link from 'next/link';
 
-export default function MarketNarrativesPage() {
-  const narratives = [
-    {
-      name: "Real World Assets (RWA)",
-      description: "Tokens que representan activos del mundo real (inmuebles, commodities, bonos) en la blockchain.",
-      projects: ["MakerDAO (RWA), Centrifuge, Ondo Finance"],
-      trending: true,
-      link: "#", // Enlace a un artículo o sección detallada
-    },
-    {
-      name: "DePIN (Decentralized Physical Infrastructure Networks)",
-      description: "Proyectos que usan tokens para incentivar la construcción y mantenimiento de infraestructura física descentralizada.",
-      projects: ["Helium, Render Network, Arweave"],
-      trending: true,
-      link: "#",
-    },
-    {
-      name: "AI + Crypto",
-      description: "La intersección de la inteligencia artificial y la tecnología blockchain para nuevas aplicaciones.",
-      projects: ["Fetch.ai, SingularityNET, Worldcoin"],
-      trending: true,
-      link: "#",
-    },
-    {
-      name: "Zero-Knowledge (ZK) Proofs",
-      description: "Tecnología criptográfica que permite verificar la validez de una declaración sin revelar la información subyacente.",
-      projects: ["Polygon (ZK-EVM), Starknet, Aleo"],
-      trending: false,
-      link: "#",
-    },
-    // Agrega más narrativas
-  ];
-
-  return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center text-yellow-400 mb-8">Panel de Narrativas de Mercado</h1>
-        <p className="text-center text-gray-300 mb-12">
-          Explora las tendencias y narrativas emergentes que están dando forma al futuro de Web3.
-          Aquí no encontrarás consejos de inversión, solo información y proyectos clave.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {narratives.map((narrative, index) => (
-            <div key={index} className="bg-[#1A1A1A] p-8 rounded-xl shadow-lg border border-gray-700">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-semibold text-yellow-300">{narrative.name}</h2>
-                {narrative.trending && (
-                  <span className="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">Tendencia</span>
-                )}
-              </div>
-              <p className="text-gray-300 mb-4">{narrative.description}</p>
-              <h3 className="text-lg font-semibold text-gray-200 mb-2">Proyectos Clave:</h3>
-              <ul className="list-disc list-inside text-gray-400 text-sm mb-4">
-                {narrative.projects.map((project, pIndex) => (
-                  <li key={pIndex}>{project}</li>
+        {/* Sección de Precios y Planes */}
+        <section id="pricing" className="w-full max-w-6xl py-20 px-6 bg-[#1e293b] rounded-xl shadow-2xl my-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">
+                {t.pricingTitle}
+            </h2>
+            <p className="text-lg md:text-xl text-gray-300 text-center mb-12 max-w-3xl mx-auto">
+                {t.pricingSubtitle}
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {t.pricingPlans.map((plan, index) => (
+                    <div key={index} className="bg-[#0f172a] p-8 rounded-lg shadow-lg flex flex-col justify-between transform hover:scale-105 transition-transform duration-300">
+                        <div>
+                            <h3 className="text-2xl font-bold text-blue-300 mb-4 text-center">{plan.name}</h3>
+                            <p className="text-5xl font-extrabold text-green-400 text-center mb-6">
+                                {plan.price}
+                                <span className="text-lg text-gray-400 font-normal">{plan.frequency}</span>
+                            </p>
+                            <ul className="space-y-3 text-gray-300 mb-8">
+                                {plan.features.map((feature, idx) => (
+                                    <li key={idx} className="flex items-center">
+                                        <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                        </svg>
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                        <a
+                            href={plan.buttonLink}
+                            className="w-full text-center bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-6 rounded-full transition-all duration-300 btn-blue mt-auto"
+                        >
+                            {plan.buttonText}
+                        </a>
+                    </div>
                 ))}
-              </ul>
-              {narrative.link && (
-                <Link href={narrative.link} className="text-yellow-400 hover:underline text-sm">
-                  Ver más sobre esta narrativa &rarr;
-                </Link>
-              )}
             </div>
-          ))}
+        </section>
+
+        {/* Sección de Aportes Voluntarios */}
+        <section id="contribute" className="w-full max-w-4xl py-20 px-6 bg-[#111827] rounded-xl shadow-lg my-10 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-green-300">{t.contributeTitle}</h2>
+          <p className="text-lg md:text-xl text-gray-300 mb-8">{t.contributeSubtitle}</p>
+          <p className="text-gray-400 mb-6">{t.contributeText}</p>
+          <div className="bg-[#0f172a] p-6 rounded-lg inline-block shadow-md">
+            <code className="text-xl md:text-2xl font-mono text-yellow-300 select-all break-all">{t.contributeAddress}</code>
+            <button
+                onClick={() => {
+                    navigator.clipboard.writeText(t.contributeAddress).then(() => {
+                        alert(lang === 'es' ? '¡Dirección copiada al portapapeles!' : 'Address copied to clipboard!');
+                    }).catch(err => {
+                        console.error('Error al copiar: ', err);
+                        alert(lang === 'es' ? 'Error al copiar la dirección.' : 'Failed to copy address.');
+                    });
+                }}
+                className="mt-4 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300"
+            >
+                {lang === 'es' ? 'Copiar Dirección' : 'Copy Address'}
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 mt-4 italic">{t.contributeSuggested}</p>
+        </section>
+
+        {/* Sección de Testimonios */}
+        <section className="w-full max-w-6xl py-20 px-6 bg-[#1e293b] rounded-xl shadow-2xl my-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">{t.testimonialsTitle}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {t.testimonials.map((testimonial, index) => (
+              <div key={index} className="bg-[#0f172a] p-6 rounded-lg shadow-md testimonial-card">
+                <p className="text-gray-300 italic mb-4">"{testimonial.quote}"</p>
+                <p className="font-semibold text-blue-300">{testimonial.name}</p>
+                {renderStars(testimonial.stars)}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Sección de Roadmap */}
+        <section className="w-full max-w-4xl py-20 px-6 bg-[#111827] rounded-xl shadow-lg my-10">
+          <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">
+            {t.roadmap}
+          </h2>
+          <ul className="text-lg text-gray-300 space-y-4 text-center">
+            {t.steps.map((step, index) => (
+              <li key={index} className="flex items-center justify-center">
+                <span className="text-xl mr-2">{step.startsWith('✅') ? '✅' : '🔜'}</span>
+                {step.substring(step.indexOf(' ') + 1)}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Sección de Contacto */}
+        <section id="contact" className="w-full max-w-4xl py-20 px-6 bg-[#1e293b] rounded-xl shadow-2xl my-10 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-green-300">{t.contactTitle}</h2>
+          <p className="text-lg text-gray-300 mb-8">{t.contactText}</p>
+          <a
+            href={`mailto:${t.contactEmail}`}
+            className="inline-block bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-xl shadow-lg transition-all duration-300 transform hover:scale-105 btn-gradient"
+          >
+            {t.contactEmail}
+          </a>
+          <div className="mt-8 flex justify-center space-x-6 text-2xl">
+            {t.socialMedia.twitter && (
+              <a href={t.socialMedia.twitter.url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
+                {/* Puedes usar un ícono de Font Awesome si lo tienes configurado, o un SVG */}
+                <svg fill="currentColor" viewBox="0 0 24 24" className="w-7 h-7">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.13l-6.236-8.754L7.006 21.75H3.69L10.649 13.06 2.56 2.25h8.07L12 10.74 18.244 2.25zM17.29 20.25h2.14L6.596 3.75H4.33L17.29 20.25z"/>
+                </svg>
+                <span className="sr-only">{t.socialMedia.twitter.label}</span>
+              </a>
+            )}
+            {t.socialMedia.facebook && (
+              <a href={t.socialMedia.facebook.url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-600 transition-colors duration-300">
+                <svg fill="currentColor" viewBox="0 0 24 24" className="w-7 h-7">
+                    <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.812c-3.266 0-4.188 1.09-4.188 4v2.5z"/>
+                </svg>
+                <span className="sr-only">{t.socialMedia.facebook.label}</span>
+              </a>
+            )}
+            {t.socialMedia.instagram && (
+              <a href={t.socialMedia.instagram.url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-pink-500 transition-colors duration-300">
+                <svg fill="currentColor" viewBox="0 0 24 24" className="w-7 h-7">
+                    <path d="M12 2c2.716 0 3.056.01 4.122.06a7.487 7.487 0 012.651.533 4.148 4.148 0 012.32 2.32 7.487 7.487 0 01.533 2.651c.049 1.066.06 1.406.06 4.122v.001c0 2.716-.01 3.056-.06 4.122a7.487 7.487 0 01-.533 2.651 4.148 4.148 0 01-2.32 2.32 7.487 7.487 0 01-2.651.533c-1.066.049-1.406.06-4.122.06h-.001c-2.716 0-3.056-.01-4.122-.06a7.487 7.487 0 01-2.651-.533 4.148 4.148 0 01-2.32-2.32 7.487 7.487 0 01-.533-2.651c-.049-1.066-.06-1.406-.06-4.122v-.001c0-2.716.01-3.056.06-4.122a7.487 7.487 0 01.533-2.651 4.148 4.148 0 012.32-2.32A7.487 7.487 0 017.878 2.06C8.944 2.01 9.284 2 12 2zm0 3.655c-3.11 0-5.636 2.526-5.636 5.636s2.526 5.636 5.636 5.636 5.636-2.526 5.636-5.636S15.11 5.655 12 5.655zm0 1.932c2.04 0 3.704 1.664 3.704 3.704s-1.664 3.704-3.704 3.704-3.704-1.664-3.704-3.704 1.664-3.704 3.704-3.704zm6.401-3.666a1.397 1.397 0 110 2.794 1.397 1.397 0 010-2.794z"/>
+                </svg>
+                <span className="sr-only">{t.socialMedia.instagram.label}</span>
+              </a>
+            )}
+          </div>
+        </section>
+
+      </main>
+
+      <footer className="w-full py-10 px-6 bg-[#0f172a] text-gray-400 text-center text-sm border-t border-gray-700">
+        <div className="flex flex-wrap justify-center gap-4 mb-4">
+          <a href="#" className="hover:underline">{t.privacyPolicy}</a>
+          <span className="mx-2">|</span>
+          <a href="#" className="hover:underline">{t.termsOfService}</a>
         </div>
-
-        <p className="mt-12 text-center text-gray-400 text-sm">
-          Descargo de responsabilidad: La información aquí es solo para fines educativos y no constituye asesoramiento financiero.
-        </p>
-      </div>
-    </div>
+        <p className="max-w-xl mx-auto">{t.footer}</p>
+      </footer>
+    </>
   );
 }
-EOF
 
-# --- 8. src/components/Navbar.tsx ---
-mkdir -p src/components
-cat > src/components/Navbar.tsx << EOF
-// src/components/Navbar.tsx
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-
-export default function Navbar() {
-  return (
-    <nav className="bg-[#1A1A1A] p-4 shadow-lg sticky top-0 z-50">
-      <div className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="flex items-center space-x-2">
-          <Image
-            src="/multitokenworld-logo.png" // Asegúrate de que tu logo esté en public/
-            alt="MultitokenWorld Logo"
-            width={40}
-            height={40}
-          />
-          <span className="text-white text-2xl font-bold">
-            <span className="text-blue-400">Multi</span>
-            <span className="text-green-400">token</span>
-            <span className="text-white">World</span>
-          </span>
-        </Link>
-        <div className="flex space-x-6 text-lg">
-          <Link href="/audit" className="text-gray-300 hover:text-blue-400 transition-colors">
-            Auditoría
-          </Link>
-          <Link href="/generate" className="text-gray-300 hover:text-green-400 transition-colors">
-            Generador
-          </Link>
-          <Link href="/learn" className="text-gray-300 hover:text-purple-400 transition-colors">
-            Aprende
-          </Link>
-          <Link href="/simulate" className="text-gray-300 hover:text-red-400 transition-colors">
-            Simulador
-          </Link>
-          <Link href="/market-narratives" className="text-gray-300 hover:text-yellow-400 transition-colors">
-            Narrativas
-          </Link>
-        </div>
-      </div>
-    </nav>
-  );
-}
-EOF
-
-# --- 9. src/components/Footer.tsx ---
-cat > src/components/Footer.tsx << EOF
-// src/components/Footer.tsx
-import React from 'react';
-
-export default function Footer() {
-  return (
-    <footer className="bg-[#1A1A1A] text-center py-8 text-white/60 text-sm mt-auto shadow-inner">
-      <div className="container mx-auto">
-        &copy; {new Date().getFullYear()} MultitokenWorld — Libertad, transparencia y tecnología.
-        <p className="mt-2 text-xs text-white/50">
-          Descargo de responsabilidad: MultitokenWorld proporciona herramientas e información educativa. No somos asesores financieros ni de inversión. La inversión en criptomonedas conlleva riesgos. Realice siempre su propia investigación (DYOR) y busque asesoramiento profesional antes de tomar decisiones.
-        </p>
-      </div>
-    </footer>
-  );
-}
-EOF
-
-# --- 10. src/styles/globals.css ---
-cat > src/styles/globals.css << EOF
-/* src/styles/globals.css */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Estilos personalizados si los necesitas, aunque Tailwind es suficiente */
-body {
-  font-family: 'Inter', sans-serif; /* Asegúrate de que Inter se cargue si lo deseas */
-}
-EOF
-
-# --- 11. tailwind.config.ts ---
-cat > tailwind.config.ts << EOF
-// tailwind.config.ts
-import type { Config } from "tailwindcss";
-
-const config: Config = {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-    extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-      },
-      colors: {
-        'blue-400': '#60A5FA', // Color de tu logo y elementos
-        'green-400': '#4ADE80', // Color de tu logo y elementos
-        'purple-400': '#C084FC',
-        'red-400': '#F87171',
-        'yellow-400': '#FACC15',
-        'blue-600': '#2563EB',
-        'green-600': '#16A34A',
-        'red-600': '#DC2626',
-        'gray-700': '#374151',
-        'gray-800': '#1F2937',
-        'gray-900': '#111827',
-        'gray-1000': '#0A0A0A', // Tu color de fondo principal
-        'gray-1A': '#1A1A1A', // Un gris oscuro para tarjetas y fondos de sección
-      },
-    },
-  },
-  plugins: [],
-};
-export default config;
-EOF
-
-# --- 12. src/utils/web3-api.ts (Crea la carpeta utils y el archivo) ---
-mkdir -p src/utils
-cat > src/utils/web3-api.ts << EOF
-// src/utils/web3-api.ts
-
-// Ejemplo de cómo podrías interactuar con Etherscan
-// Para usar la API de Etherscan, necesitarás una clave de API (gratis)
-// Puedes obtenerla en https://etherscan.io/myapikey
-
-const ETHERSCAN_API_KEY = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY || ''; // Configura esto en .env.local
-
-export async function getContractInfo(address: string, network: string) {
-  // En un proyecto real, esto haría una llamada a la API de Etherscan/BscScan/Polygonscan
-  // Ejemplo para Ethereum (necesitarías una URL base diferente para cada red)
-  const apiUrl = \`https://api.etherscan.io/api?module=contract&action=getsourcecode&address=\${address}&apikey=\${ETHERSCAN_API_KEY}\`;
-
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-
-    if (data.status === '1' && data.result && data.result.length > 0) {
-      const contract = data.result[0];
-      return {
-        name: contract.ContractName,
-        symbol: "N/A", // Necesitarías una llamada adicional para el símbolo de ERC20
-        isVerified: contract.SourceCode !== '',
-        abi: contract.ABI,
-        // Aquí puedes parsear el código fuente para buscar funciones como mint, burn, etc.
-        // Esto requeriría lógica más avanzada (parsing de AST o regex, con cautela)
-        hasMintFunction: contract.SourceCode.includes("function mint("),
-        hasBurnFunction: contract.SourceCode.includes("function burn("),
-        isPausable: contract.SourceCode.includes("Pausable.sol"), // Asumiendo OpenZeppelin
-        isOwnable: contract.SourceCode.includes("Ownable.sol"), // Asumiendo OpenZeppelin
-        // ... más propiedades
-      };
-    } else {
-      console.error("Error al obtener información del contrato:", data.message);
-      return null;
-    }
-  } catch (error) {
-    console.error("Error en la llamada a la API de Etherscan:", error);
-    return null;
-  }
-}
-
-// Ejemplo de cómo podrías obtener el precio del gas
-// Puedes usar Etherscan Gas Tracker API o Chainlink Data Feeds
-export async function getGasPrice(network: string) {
-  // Para Ethereum (Etherscan Gas Oracle)
-  const apiUrl = \`https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=\${ETHERSCAN_API_KEY}\`;
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
-    if (data.status === '1') {
-      return {
-        fast: data.result.FastGasPrice, // en Gwei
-        average: data.result.ProposeGasPrice, // en Gwei
-        low: data.result.SafeGasPrice, // en Gwei
-        // ... más datos
-      };
-    }
-    return null;
-  } catch (error) {
-    console.error("Error al obtener precio del gas:", error);
-    return null;
-  }
-}
-
-// Nota importante: Las implementaciones reales para estas funciones serán más complejas
-// y requerirán manejo de errores, caché, y posiblemente librerías de web3 para
-// interactuar con los contratos directamente si se busca su estado.
-// Para el generador de contratos, la lógica es puramente de string manipulation en el frontend.
-EOF
-
-# --- 13. .env.local ---
-cat > .env.local << EOF
-# .env.local
-# Clave de API de Etherscan (necesaria para el módulo de auditoría y simulador)
-# Obtén la tuya gratis en https://etherscan.io/myapikey
-NEXT_PUBLIC_ETHERSCAN_API_KEY=TU_CLAVE_DE_API_DE_ETHERSCAN_AQUI
-
-# Agrega otras claves de API aquí si usas CoinGecko, etc.
-# NEXT_PUBLIC_COINGECKO_API_KEY=
-EOF
-
-# --- 14. README.md ---
-cat > README.md << EOF
-# MultitokenWorld
-
-¡Bienvenido a MultitokenWorld! Tu centro integral para navegar, entender y crear en el ecosistema de las criptomonedas y Web3.
-
-Este proyecto tiene como objetivo democratizar el acceso al conocimiento y a herramientas prácticas en el mundo blockchain, siempre bajo un enfoque educativo e informativo, sin custodiar fondos ni operar como un exchange.
-
----
-
-## Características Principales
-
-* **Auditoría y Verificación de Contratos Inteligentes:** Analiza y comprende las propiedades clave de cualquier contrato en diversas blockchains.
-* **Simulador de Transacciones y Gas Fees:** Estima los costos y la velocidad de tus transacciones en tiempo real en diferentes redes.
-* **Generador de Contratos Inteligentes "Lite":** Crea el código fuente para tokens ERC-20 y NFTs (ERC-721) sin necesidad de programar.
-* **Academia Cripto y Glosario Interactivo:** Aprende los fundamentos y conceptos avanzados de Web3 con guías claras y un glosario completo.
-* **Panel de Narrativas de Mercado:** Explora las tendencias y proyectos emergentes que están dando forma al futuro del ecosistema.
-
----
-
-## Tecnologías Utilizadas
-
-* **Next.js 14+:** Un framework de React para aplicaciones web robustas y escalables.
-* **React:** Biblioteca de JavaScript para construir interfaces de usuario interactivas.
-* **TypeScript:** Un superconjunto de JavaScript que añade tipado estático.
-* **Tailwind CSS:** Un framework CSS para un diseño rápido y responsivo.
-* **APIs de Exploradores de Blockchain:** (Etherscan, BscScan, Polygonscan, etc.) para obtener datos públicos de contratos y transacciones.
-* **Git & GitHub:** Control de versiones y alojamiento de código.
-* **Vercel:** Plataforma de despliegue continuo para aplicaciones Next.js.
-
----
-
-## Cómo Ejecutar el Proyecto Localmente
-
-1.  **Navega a la carpeta del proyecto** en tu terminal (si ya no estás allí).
-2.  **Instala las dependencias:**
-    \`\`\`bash
-    npm install
-    # o
-    yarn install
-    \`\`\`
-3.  **Configura tus variables de entorno:**
-    Crea un archivo \`.env.local\` en la raíz del proyecto y añade tus claves de API:
-    \`\`\`
-    NEXT_PUBLIC_ETHERSCAN_API_KEY=TU_CLAVE_DE_API_DE_ETHERSCAN
-    # ... otras claves de API
-    \`\`\`
-4.  **Inicia el servidor de desarrollo:**
-    \`\`\`bash
-    npm run dev
-    # o
-    yarn dev
-    \`\`\`
-    Abre \`http://localhost:3000\` en tu navegador.
-
----
-
-## Despliegue en Vercel
-
-Este proyecto está optimizado para su despliegue en Vercel.
-
-1.  **Crea una cuenta en Vercel** (si no la tienes).
-2.  **Importa este repositorio** de GitHub a Vercel.
-3.  **Configura las variables de entorno** en el panel de Vercel (Settings -> Environment Variables) para que coincidan con las de tu \`.env.local\`.
-4.  Vercel detectará automáticamente que es una aplicación Next.js y la desplegará.
-5.  **Conecta tus dominios** (\`multitokenworld.com\`, \`.ca\`, \`.storage\`) en la sección "Domains" de tu proyecto en Vercel. Sigue las instrucciones para configurar los DNS en tu registrador de dominios (ej. Namecheap).
-
----
-
-## Descargo de Responsabilidad Legal
-
-MultitokenWorld es una plataforma con fines **educativos e informativos**. No ofrecemos asesoramiento financiero, de inversión, legal o de seguridad. No custodiamos fondos ni operamos como un exchange. La información y las herramientas proporcionadas se basan en datos públicos y no garantizan la seguridad o el rendimiento de ningún activo o contrato. La inversión en criptomonedas y las interacciones con contratos inteligentes conllevan riesgos significativos, incluida la pérdida total del capital. Realiza siempre tu propia investigación exhaustiva (DYOR) y busca el consejo de profesionales cualificados antes de tomar cualquier decisión.
-
----
-
-## Contribuciones
-
-¡Las contribuciones son bienvenidas! Si deseas mejorar o añadir funcionalidades, no dudes en abrir un "issue" o enviar una "pull request".
-
----
-EOF
-
-# --- Subir a GitHub ---
-echo "Iniciando la carga a GitHub..."
-
-# Inicializa Git si no se ha hecho
-git init
-
-# Añade todos los archivos al staging area
-git add .
-
-# Confirma los cambios
-git commit -m "Initial commit: MultitokenWorld full project setup with all functionalities"
-
-# Conecta con el repositorio remoto de GitHub
-# ¡Asegúrate de haber creado un repositorio vacío llamado 'multitokenworld' en tu cuenta de GitHub!
-git remote add origin https://github.com/$GITHUB_USERNAME/$PROJECT_NAME.git 2>/dev/null || git remote set-url origin https://github.com/$GITHUB_USERNAME/$PROJECT_NAME.git
-
-# Renombra la rama a 'main'
-git branch -M main
-
-# Sube los archivos a GitHub
-echo "Empujando el código a GitHub. Puede que te pida tus credenciales."
-git push -u origin main
-
-echo "¡Felicidades! Tu proyecto MultitokenWorld debería estar ahora en GitHub."
-echo "Recuerda: Si usas un logo, pon tu imagen 'multitokenworld-logo.png' manualmente en la carpeta '$PROJECT_NAME/public/'."
-echo "Luego, el siguiente paso es ir a Vercel para conectar el repositorio y desplegar tu sitio web."
