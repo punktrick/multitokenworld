@@ -727,7 +727,6 @@ export default function Home() {
   // SVG para el logo placeholder
   const MultiTokenWorldLogo = () => (
     <div className="flex items-center justify-center mb-8">
-      {/* Placeholder para el logo. Reemplaza este SVG o la etiqueta img con tu logo real */}
       <svg className="w-24 h-24 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.033 3-9S13.657 3 12 3s-3 4.033-3 9 1.343 9 3 9z" />
       </svg>
