@@ -7,7 +7,8 @@ import Head from "next/head"; // Head de Next.js para gestionar el <head> del HT
 // axios es opcional si usas la API Fetch nativa del navegador, como se hace para CoinGecko.
 // import axios from "axios";
 // ethers es crucial para interactuar con la blockchain (ej. conectar billetera, desplegar contratos).
-// import { ethers } from "ethers"; // Asegúrate de tenerlo instalado: npm install ethers
+// Asegúrate de tenerlo instalado: npm install ethers
+// import { ethers } from "ethers"; // Mantener comentado si no está configurado o instalado
 
 export default function Home() {
   const [lang, setLang] = useState("es"); // Estado para el idioma
@@ -342,7 +343,7 @@ export default function Home() {
 
     const handleConnectWallet = async () => {
       // Aquí iría la lógica para conectar la billetera (ej. usando wagmi/rainbowkit o ethers.js BrowserProvider)
-      // if (window.ethereum) {
+      // if (typeof window !== 'undefined' && window.ethereum) { // Añadir typeof window !== 'undefined' para Next.js SSR
       //   try {
       //     const provider = new ethers.BrowserProvider(window.ethereum);
       //     await provider.send("eth_requestAccounts", []);
@@ -509,7 +510,7 @@ export default function Home() {
             try {
                 const ids = cryptos.join(",");
                 const currency = "usd";
-                // Usar fetch API directamente, si no quieres axios
+                // Usar fetch API directamente para CoinGecko
                 const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=${currency}`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -558,7 +559,7 @@ export default function Home() {
                             <div key={cryptoId} className="bg-[#0f172a] p-5 rounded-lg flex items-center justify-between shadow">
                                 <span className="text-lg font-medium capitalize text-blue-300">{cryptoId}</span>
                                 <span className="text-xl font-bold text-green-400">
-                                    ${prices[cryptoId].usd.toFixed(2)} USD
+                                    ${prices[cryptoId] && prices[cryptoId].usd ? prices[cryptoId].usd.toFixed(2) : 'N/A'} USD
                                 </span>
                             </div>
                         ))}
@@ -779,12 +780,24 @@ export default function Home() {
     );
   };
 
+  // SVG para el logo placeholder
+  const MultiTokenWorldLogo = () => (
+    <div className="flex items-center justify-center mb-8">
+      {/* Placeholder para el logo. Reemplaza este SVG o la etiqueta img con tu logo real */}
+      <svg className="w-24 h-24 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.033 3-9S13.657 3 12 3s-3 4.033-3 9 1.343 9 3 9z" />
+      </svg>
+      <span className="ml-4 text-5xl font-extrabold text-green-400">MTW</span> {/* O solo un span con el texto */}
+    </div>
+  );
+
 
   return (
     <>
       <Head>
         <title>{t.headline}</title>
         <meta name="description" content={t.subtitle} />
+        {/* Favicon estándar de Next.js. Si tienes un logo, podrías reemplazarlo. */}
         <link rel="icon" href="/favicon.ico" />
         {/* Fuente Inter de Google Fonts */}
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
@@ -805,6 +818,7 @@ export default function Home() {
       <main className="flex flex-col items-center justify-center min-h-screen py-2 bg-[#0f172a] text-white">
         {/* Sección de Héroe */}
         <section className="text-center py-20 px-4 max-w-4xl">
+          <MultiTokenWorldLogo /> {/* Logo Placeholder */}
           <p className="text-sm italic text-gray-400 mb-4 font-mono">{t.quote}</p>
           <h1 className="text-5xl md:text-7xl font-extrabold text-green-400 mb-4 leading-tight">
             {t.headline}
@@ -830,6 +844,7 @@ export default function Home() {
           <h2 className="text-3xl md:text-4xl font-bold mb-10 text-center text-green-300">
             {t.featuresTitle}
           </h2>
+          {/* Asegura que los checkmarks de Roadmap tengan el tamaño adecuado */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {t.features.map((feature, index) => (
               <div
@@ -871,9 +886,8 @@ export default function Home() {
                             <ul className="space-y-3 text-gray-300 mb-8">
                                 {plan.features.map((feature, idx) => (
                                     <li key={idx} className="flex items-center">
-                                        <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                        </svg>
+                                        {/* Asegura que el tamaño de los checkmarks sea consistente */}
+                                        <span className="text-green-500 text-xl mr-2">✅</span>
                                         {feature}
                                     </li>
                                 ))}
@@ -898,22 +912,26 @@ export default function Home() {
           <div className="bg-[#0f172a] p-6 rounded-lg inline-block shadow-md">
             <code className="text-xl md:text-2xl font-mono text-yellow-300 select-all break-all">{t.contributeAddress}</code>
             <button
-                // Importante: alert() y window.alert() no funcionan en el entorno de Canvas.
-                // Si quieres mostrar un mensaje al usuario, usa un modal personalizado.
-                // Para este contexto, mantendremos el console.log y una simulación de copia.
+                // Para copiar al portapapeles sin alert() en Next.js/Vercel Canvas
                 onClick={() => {
-                    // Esta es una simulación para entornos donde navigator.clipboard.writeText puede no funcionar
-                    // debido a restricciones de iframe o seguridad del navegador sin HTTPS.
-                    // Para una implementación robusta, se recomienda una librería como 'react-copy-to-clipboard'
-                    // o asegurar un entorno HTTPS para el uso de navigator.clipboard.writeText.
-                    const dummyTextArea = document.createElement("textarea");
-                    dummyTextArea.value = t.contributeAddress;
-                    document.body.appendChild(dummyTextArea);
-                    dummyTextArea.select();
-                    document.execCommand('copy'); // Método de respaldo para copiar al portapapeles
-                    document.body.removeChild(dummyTextArea);
-                    console.log(lang === 'es' ? '¡Dirección copiada al portapapeles!' : 'Address copied to clipboard!');
-                    // Considera un componente modal para feedback al usuario
+                    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText(t.contributeAddress).then(() => {
+                            console.log(lang === 'es' ? '¡Dirección copiada al portapapeles!' : 'Address copied to clipboard!');
+                            // Aquí podrías mostrar un modal o un mensaje temporal en la UI
+                        }).catch(err => {
+                            console.error('Error al copiar: ', err);
+                            // Aquí podrías mostrar un modal de error
+                        });
+                    } else {
+                        // Fallback para entornos sin navigator.clipboard (como algunos iframes)
+                        const dummyTextArea = document.createElement("textarea");
+                        dummyTextArea.value = t.contributeAddress;
+                        document.body.appendChild(dummyTextArea);
+                        dummyTextArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(dummyTextArea);
+                        console.log(lang === 'es' ? '¡Dirección copiada al portapapeles (método alternativo)!' : 'Address copied (alternative method)!');
+                    }
                 }}
                 className="mt-4 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300"
             >
@@ -945,7 +963,10 @@ export default function Home() {
           <ul className="text-lg text-gray-300 space-y-4 text-center">
             {t.steps.map((step, index) => (
               <li key={index} className="flex items-center justify-center">
-                <span className="text-xl mr-2">{step.startsWith('✅') ? '✅' : '🔜'}</span>
+                {/* Asegura que el tamaño de los checkmarks sea consistente */}
+                <span className={`text-xl mr-2 ${step.startsWith('✅') ? 'text-green-500' : 'text-orange-400'}`}>
+                    {step.startsWith('✅') ? '✅' : '🔜'}
+                </span>
                 {step.substring(step.indexOf(' ') + 1)}
               </li>
             ))}
@@ -965,7 +986,6 @@ export default function Home() {
           <div className="mt-8 flex justify-center space-x-6 text-2xl">
             {t.socialMedia.twitter && (
               <a href={t.socialMedia.twitter.url} target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition-colors duration-300">
-                {/* Puedes usar un ícono de Font Awesome si lo tienes configurado, o un SVG */}
                 <svg fill="currentColor" viewBox="0 0 24 24" className="w-7 h-7">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.13l-6.236-8.754L7.006 21.75H3.69L10.649 13.06 2.56 2.25h8.07L12 10.74 18.244 2.25zM17.29 20.25h2.14L6.596 3.75H4.33L17.29 20.25z"/>
                 </svg>
@@ -1004,3 +1024,4 @@ export default function Home() {
     </>
   );
 }
+
