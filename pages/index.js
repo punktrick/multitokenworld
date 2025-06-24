@@ -26,7 +26,7 @@ export default function Home() {
         { text: "Precios en Vivo", href: "#live-prices" },
         { text: "Planes y Precios", href: "#pricing" },
         { text: "Aportes Voluntarios", href: "#contribute" },
-        { text: "Publicidad", href: "#advertising" }, // NUEVO: Botón para Publicidad
+        { text: "Publicidad", href: "#advertising" },
       ],
       featuresTitle: "¿Qué puedes hacer aquí?",
       features: [
@@ -129,7 +129,7 @@ export default function Home() {
         { text: "Live Prices", href: "#live-prices" },
         { text: "Plans & Pricing", href: "#pricing" },
         { text: "Voluntary Contributions", href: "#contribute" },
-        { text: "Advertising", href: "#advertising" }, // NEW: Button for Advertising
+        { text: "Advertising", href: "#advertising" },
       ],
       featuresTitle: "What can you do here?",
       features: [
@@ -693,7 +693,7 @@ export default function Home() {
     );
   };
 
-  // --- NUEVO COMPONENTE: Advertising (Publicidad) ---
+  // --- COMPONENTE: Advertising (Publicidad) ---
   const Advertising = () => {
     const componentT = {
       es: {
@@ -760,13 +760,14 @@ export default function Home() {
   };
 
 
-  // Función para renderizar estrellas de testimonio
+  // Función para renderizar estrellas de testimonio (AJUSTADA PARA EL TAMAÑO)
   const renderStars = (numStars) => {
     return (
       <div className="flex justify-center mt-2">
         {[...Array(5)].map((_, i) => (
           <svg
             key={i}
+            // Clases de Tailwind para asegurar el tamaño correcto (w-5 h-5 son 20x20px)
             className={`w-5 h-5 ${i < numStars ? 'text-yellow-400' : 'text-gray-600'}`}
             fill="currentColor"
             viewBox="0 0 20 20"
@@ -847,7 +848,7 @@ export default function Home() {
         <TokenGenerator />
         <CryptoPrices />
         <CryptoEducation />
-        <Advertising /> {/* NUEVO: Incluye el componente de Publicidad */}
+        <Advertising /> {/* Incluye el componente de Publicidad */}
 
 
         {/* Sección de Precios y Planes */}
@@ -897,13 +898,22 @@ export default function Home() {
           <div className="bg-[#0f172a] p-6 rounded-lg inline-block shadow-md">
             <code className="text-xl md:text-2xl font-mono text-yellow-300 select-all break-all">{t.contributeAddress}</code>
             <button
+                // Importante: alert() y window.alert() no funcionan en el entorno de Canvas.
+                // Si quieres mostrar un mensaje al usuario, usa un modal personalizado.
+                // Para este contexto, mantendremos el console.log y una simulación de copia.
                 onClick={() => {
-                    navigator.clipboard.writeText(t.contributeAddress).then(() => {
-                        alert(lang === 'es' ? '¡Dirección copiada al portapapeles!' : 'Address copied to clipboard!');
-                    }).catch(err => {
-                        console.error('Error al copiar: ', err);
-                        alert(lang === 'es' ? 'Error al copiar la dirección.' : 'Failed to copy address.');
-                    });
+                    // Esta es una simulación para entornos donde navigator.clipboard.writeText puede no funcionar
+                    // debido a restricciones de iframe o seguridad del navegador sin HTTPS.
+                    // Para una implementación robusta, se recomienda una librería como 'react-copy-to-clipboard'
+                    // o asegurar un entorno HTTPS para el uso de navigator.clipboard.writeText.
+                    const dummyTextArea = document.createElement("textarea");
+                    dummyTextArea.value = t.contributeAddress;
+                    document.body.appendChild(dummyTextArea);
+                    dummyTextArea.select();
+                    document.execCommand('copy'); // Método de respaldo para copiar al portapapeles
+                    document.body.removeChild(dummyTextArea);
+                    console.log(lang === 'es' ? '¡Dirección copiada al portapapeles!' : 'Address copied to clipboard!');
+                    // Considera un componente modal para feedback al usuario
                 }}
                 className="mt-4 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300"
             >
@@ -994,4 +1004,3 @@ export default function Home() {
     </>
   );
 }
-
